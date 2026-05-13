@@ -1,0 +1,159 @@
+/* Trading page specific styles */
+
+.trading-grid {
+  display: grid;
+  grid-template-columns: 1fr 320px;
+  gap: 16px;
+  align-items: start;
+}
+
+.trading-main {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
+}
+
+.trading-side {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.trading-chart-card {
+  padding: 12px;
+  gap: 0;
+  overflow: hidden;
+}
+
+.trading-chart-card .tradingview-widget-container {
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--app-row-bg);
+}
+
+.trading-trade {
+  gap: 14px;
+}
+
+.trading-trade__row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.trading-trade__label {
+  font: 700 11px/1 var(--app-font);
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  color: var(--app-text-muted);
+}
+
+.trading-trade__amounts {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+}
+
+.amount-btn {
+  background: transparent;
+  border: 1px solid var(--app-border-soft);
+  border-radius: 6px;
+  padding: 8px 0;
+  font: 700 13px/1 var(--app-font);
+  color: var(--app-text);
+  cursor: pointer;
+  transition: border-color 0.15s ease, color 0.15s ease;
+}
+
+.amount-btn:hover {
+  border-color: var(--app-text-muted);
+}
+
+.amount-btn.is-active {
+  border-color: var(--app-accent);
+  color: var(--app-accent);
+}
+
+.trading-trade__progress {
+  height: 4px;
+  background: var(--app-border-soft);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.trading-trade__progress-fill {
+  height: 100%;
+  width: 35%;
+  background: var(--app-accent);
+  border-radius: 2px;
+}
+
+.trade-cta {
+  width: 100%;
+  border: 0;
+  border-radius: 8px;
+  padding: 14px 0;
+  font: 900 16px/1 var(--app-font);
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  cursor: pointer;
+  color: #05070a;
+  transition: filter 0.15s ease, transform 0.05s ease;
+}
+
+.trade-cta:hover {
+  filter: brightness(1.05);
+}
+
+.trade-cta--up {
+  background: var(--app-accent);
+  box-shadow: 0 0 20px rgba(0, 255, 163, 0.3);
+}
+
+.trade-cta--down {
+  background: var(--app-danger);
+  box-shadow: 0 0 20px rgba(255, 59, 59, 0.3);
+}
+
+.balance-btn {
+  flex: 1;
+  background: transparent;
+  border: 1px solid var(--app-border-soft);
+  border-radius: 8px;
+  padding: 10px 14px;
+  font: 700 11px/1 var(--app-font);
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  color: var(--app-text);
+  cursor: pointer;
+  transition: border-color 0.15s ease;
+}
+
+.balance-btn:hover {
+  border-color: var(--app-text-muted);
+}
+
+.balance-btn--primary {
+  background: var(--app-accent);
+  border-color: var(--app-accent);
+  color: #0b0f14;
+}
+
+.balance-btn--primary:hover {
+  filter: brightness(1.05);
+}
+
+.trading-tournament {
+  background: linear-gradient(180deg, #05070a 0%, rgba(0, 255, 163, 0.04) 100%);
+}
+
+.trading-tournament__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.trading-positions {
+  padding: 20px 24px;
+}

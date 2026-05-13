@@ -1,0 +1,585 @@
+/* ============================================================
+   UpdownX — Shared App Shell (header + sidebar + content)
+   Used by all main app pages: Trading, Markets, Balance,
+   Tournaments, History, Account.
+   ============================================================ */
+
+:root {
+  --app-bg: #05070a;
+  --app-card-bg: #05070a;
+  --app-row-bg: #0b0f14;
+  --app-border: #2cf6c3;
+  --app-border-soft: #1a1f26;
+  --app-accent: #00ffa3;
+  --app-danger: #ff3b3b;
+  --app-text: #ffffff;
+  --app-text-muted: #6b7280;
+  --app-text-dim: #4b5563;
+  --app-text-faint: #64748b;
+  --app-font: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+}
+
+.app-shell,
+.app-shell * {
+  box-sizing: border-box;
+}
+
+.app-shell {
+  position: relative;
+  min-height: 100vh;
+  background: var(--app-bg);
+  color: var(--app-text);
+  font-family: var(--app-font);
+  overflow-x: hidden;
+}
+
+/* Subtle green corner glow */
+.app-shell::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background:
+    radial-gradient(60% 50% at 0% 100%, rgba(44, 246, 195, 0.10) 0%, transparent 60%),
+    radial-gradient(55% 50% at 100% 0%, rgba(0, 255, 163, 0.06) 0%, transparent 60%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* -------------------- Header -------------------- */
+.app-header {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 24px;
+  padding: 12px 30px;
+  background: #0b0f14;
+  border-bottom: 1px solid var(--app-border);
+}
+
+.app-header__left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  min-width: 0;
+}
+
+.app-header__logo {
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
+  user-select: none;
+  flex-shrink: 0;
+}
+
+.app-header__logo img {
+  height: 32px;
+  width: auto;
+  display: block;
+}
+
+.app-header__auth {
+  display: flex;
+  gap: 8px;
+}
+
+.app-header__auth-btn {
+  padding: 8px 14px;
+  border-radius: 8px;
+  font: 700 12px/1 var(--app-font);
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  text-decoration: none;
+  border: 1px solid rgba(0, 255, 163, 0.3);
+  color: #cbd5e1;
+  background: transparent;
+  transition: border-color 0.15s ease, color 0.15s ease, background-color 0.15s ease;
+}
+
+.app-header__auth-btn:hover {
+  color: var(--app-accent);
+  border-color: var(--app-accent);
+  background: rgba(0, 255, 163, 0.08);
+}
+
+.app-header__auth-btn--primary {
+  background: var(--app-accent);
+  color: #0b0f14;
+  border-color: var(--app-accent);
+}
+
+.app-header__auth-btn--primary:hover {
+  background: #2cf6c3;
+  color: #0b0f14;
+  filter: brightness(1.05);
+}
+
+.app-header__nav {
+  display: flex;
+  gap: 28px;
+  justify-self: center;
+}
+
+.app-header__nav-link {
+  font: 600 14px/1 var(--app-font);
+  color: #94a3b8;
+  text-decoration: none;
+  padding: 6px 0;
+  border-bottom: 2px solid transparent;
+  transition: color 0.15s ease, border-color 0.15s ease;
+}
+
+.app-header__nav-link:hover {
+  color: var(--app-text);
+}
+
+.app-header__nav-link.is-active {
+  color: var(--app-accent);
+  border-bottom-color: var(--app-accent);
+}
+
+.app-header__balance {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.app-header__right {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  justify-self: end;
+  grid-column: 3;
+}
+
+.app-header__balance-info {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  font: 700 11px/1.2 var(--app-font);
+  letter-spacing: 0.5px;
+  color: var(--app-text-muted);
+  text-transform: uppercase;
+}
+
+.app-header__balance-amount {
+  font: 900 16px/1.2 var(--app-font);
+  color: var(--app-text);
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.app-header__balance-amount span {
+  color: var(--app-text-muted);
+  font-weight: 600;
+  font-size: 11px;
+  margin-left: 4px;
+}
+
+.app-header__deposit {
+  background: var(--app-accent);
+  color: #0b0f14;
+  border: 0;
+  border-radius: 8px;
+  padding: 10px 18px;
+  font: 900 12px/1 var(--app-font);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  cursor: pointer;
+  text-decoration: none;
+  transition: filter 0.15s ease, transform 0.05s ease;
+}
+
+.app-header__deposit:hover {
+  filter: brightness(1.05);
+}
+
+.app-header__avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #475569 0%, #1e293b 100%);
+  border: 1px solid rgba(0, 255, 163, 0.3);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  color: #cbd5e1;
+  font-weight: 900;
+}
+
+.app-header__logout {
+  background: transparent;
+  border: 0;
+  padding: 6px;
+  color: var(--app-text-muted);
+  cursor: pointer;
+  display: inline-flex;
+  border-radius: 6px;
+  transition: color 0.15s ease, background-color 0.15s ease;
+}
+
+.app-header__logout:hover {
+  color: var(--app-text);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+/* -------------------- TradingView widget --------------- */
+/* The TradingView script mutates the inline style of
+   .tradingview-widget-container (forces height: 100%), so we anchor
+   the actual pixel height on .tv-chart-wrapper (via inline style)
+   and force every NESTED element to fill that wrapper. */
+.tv-chart-wrapper {
+  flex-shrink: 0;
+}
+
+.tv-chart-wrapper .tradingview-widget-container,
+.tv-chart-wrapper .tradingview-widget-container__widget,
+.tv-chart-wrapper iframe {
+  width: 100% !important;
+  height: 100% !important;
+  display: block;
+  border: 0;
+}
+
+/* -------------------- Layout body -------------------- */
+.app-body {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: 314px 1fr;
+  gap: 16px;
+  padding: 24px 40px;
+  align-items: start;
+}
+
+/* -------------------- Sidebar -------------------- */
+.app-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  position: sticky;
+  top: 24px;
+}
+
+.card {
+  background: var(--app-card-bg);
+  border: 1px solid var(--app-border);
+  border-radius: 12px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.card__title {
+  margin: 0;
+  font: 700 13px/1 var(--app-font);
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  color: var(--app-text-muted);
+}
+
+.search {
+  position: relative;
+  display: flex;
+  align-items: center;
+  background: var(--app-row-bg);
+  border-radius: 8px;
+  padding: 8px 10px 8px 32px;
+}
+
+.search svg {
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--app-text-muted);
+}
+
+.search input {
+  width: 100%;
+  background: transparent;
+  border: 0;
+  outline: 0;
+  color: var(--app-text);
+  font: 400 13px/1 var(--app-font);
+}
+
+.search input::placeholder {
+  color: var(--app-text-muted);
+}
+
+.market-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--app-row-bg);
+  padding: 6px 10px;
+  border-radius: 4px;
+  font: 600 13px/1 var(--app-font);
+}
+
+.market-row__name {
+  flex: 1;
+  display: flex;
+  align-items: baseline;
+  gap: 1px;
+}
+
+.market-row__symbol {
+  color: var(--app-text);
+  font-weight: 700;
+}
+
+.market-row__pair {
+  color: rgba(255, 255, 255, 0.5);
+  font-weight: 600;
+}
+
+.market-row__change {
+  font-weight: 700;
+}
+
+.is-up {
+  color: var(--app-accent);
+}
+
+.is-down {
+  color: var(--app-danger);
+}
+
+/* Crypto coin icons (CSS-only, gradient circles with letter) */
+.coin {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font: 900 11px/1 var(--app-font);
+  flex-shrink: 0;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+}
+
+.coin--btc { background: linear-gradient(135deg, #f7931a, #c47408); }
+.coin--eth { background: linear-gradient(135deg, #627eea, #3c52a3); }
+.coin--ltc { background: linear-gradient(135deg, #b8b8b8, #6c6c6c); }
+.coin--sol { background: linear-gradient(135deg, #9945ff, #14f195); }
+.coin--xrp { background: linear-gradient(135deg, #1c1f23, #565555); }
+.coin--ada { background: linear-gradient(135deg, #0033ad, #001f6e); }
+
+/* Trader avatar circle (sidebar live trades / top traders) */
+.trader-avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font: 700 11px/1 var(--app-font);
+  flex-shrink: 0;
+  border: 1px solid rgba(0, 255, 163, 0.3);
+}
+
+.trader-avatar--1 { background: linear-gradient(135deg, #6366f1, #a855f7); }
+.trader-avatar--2 { background: linear-gradient(135deg, #f59e0b, #ef4444); }
+.trader-avatar--3 { background: linear-gradient(135deg, #14b8a6, #0ea5e9); }
+.trader-avatar--4 { background: linear-gradient(135deg, #ec4899, #f43f5e); }
+.trader-avatar--5 { background: linear-gradient(135deg, #22c55e, #84cc16); }
+
+/* -------------------- Content area -------------------- */
+.app-content {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
+}
+
+.content-card {
+  background: var(--app-card-bg);
+  border: 1px solid var(--app-border);
+  border-radius: 12px;
+  padding: 32px 44px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.page-title {
+  margin: 0;
+  font: 900 36px/40px var(--app-font);
+  letter-spacing: -0.9px;
+  color: var(--app-text);
+}
+
+.page-subtitle {
+  margin: 0;
+  font: 400 14px/22px var(--app-font);
+  color: var(--app-text-muted);
+}
+
+/* Generic table styling for History / Markets */
+.data-table {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.data-table__head {
+  display: grid;
+  padding: 0 20px;
+  font: 700 12px/1 var(--app-font);
+  letter-spacing: 0.6px;
+  color: var(--app-text-muted);
+  text-transform: uppercase;
+}
+
+.data-table__row {
+  display: grid;
+  align-items: center;
+  background: var(--app-row-bg);
+  border-radius: 4px;
+  padding: 6px 10px;
+  height: 38px;
+}
+
+.cell {
+  font: 600 13px/1.2 var(--app-font);
+  color: var(--app-text);
+}
+
+.cell--muted {
+  color: rgba(255, 255, 255, 0.5);
+  font-weight: 600;
+}
+
+.cell--up {
+  color: var(--app-accent);
+}
+
+.cell--down {
+  color: var(--app-danger);
+}
+
+/* Pill (WIN / LOSS / UP / DOWN) */
+.pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 3px 10px;
+  border-radius: 9999px;
+  font: 900 10px/1.2 var(--app-font);
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  width: fit-content;
+}
+
+.pill--win {
+  background: rgba(0, 255, 163, 0.1);
+  border: 1px solid rgba(0, 255, 163, 0.2);
+  color: var(--app-accent);
+}
+
+.pill--loss {
+  background: rgba(255, 59, 59, 0.1);
+  border: 1px solid rgba(255, 59, 59, 0.2);
+  color: var(--app-danger);
+}
+
+.pill--up {
+  background: var(--app-accent);
+  color: #05070a;
+  filter: drop-shadow(0 0 7.5px rgba(0, 255, 163, 0.3));
+  padding: 4px 12px;
+  font-weight: 700;
+}
+
+.pill--down {
+  background: var(--app-danger);
+  color: #05070a;
+  filter: drop-shadow(0 0 7.5px rgba(255, 59, 59, 0.3));
+  padding: 4px 12px;
+  font-weight: 700;
+}
+
+/* Tabs */
+.tabs {
+  display: flex;
+  gap: 32px;
+  border-bottom: 1px solid var(--app-border-soft);
+  padding-bottom: 0;
+}
+
+.tab {
+  background: transparent;
+  border: 0;
+  padding: 10px 4px;
+  font: 700 13px/1 var(--app-font);
+  color: var(--app-text-muted);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  transition: color 0.15s ease, border-color 0.15s ease;
+}
+
+.tab:hover {
+  color: var(--app-text);
+}
+
+.tab.is-active {
+  color: var(--app-accent);
+  border-bottom-color: var(--app-accent);
+}
+
+/* Pagination */
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 8px;
+}
+
+.pagination__info {
+  color: var(--app-text-faint);
+  font: 400 12px/1 var(--app-font);
+}
+
+.pagination__pages {
+  display: flex;
+  gap: 8px;
+}
+
+.pagination__btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  border: 1px solid var(--app-border-soft);
+  background: transparent;
+  color: var(--app-border-soft);
+  font: 700 12px/1 var(--app-font);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pagination__btn:hover {
+  border-color: var(--app-text-muted);
+  color: var(--app-text-muted);
+}
+
+.pagination__btn.is-current {
+  background: var(--app-accent);
+  border-color: var(--app-accent);
+  color: #0b0f14;
+}
+
+.pagination__btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
