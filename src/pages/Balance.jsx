@@ -1,213 +1,346 @@
+import { useState } from 'react'
 import { Pagination } from './_shared'
 import '../components/AppLayout.css'
+import './Balance.css'
 
 const TX = [
-  { type: 'Deposit', amount: '+500.00 USDT', status: 'Completed', time: 'Oct 24, 14:23:12', dir: 'in' },
-  { type: 'Withdrawal', amount: '-120.00 USDT', status: 'Completed', time: 'Oct 23, 09:14:08', dir: 'out' },
-  { type: 'Deposit', amount: '+1,000.00 USDT', status: 'Completed', time: 'Oct 21, 18:42:31', dir: 'in' },
-  { type: 'Withdrawal', amount: '-250.00 USDT', status: 'Pending', time: 'Oct 20, 22:08:55', dir: 'out' },
-  { type: 'Deposit', amount: '+200.00 USDT', status: 'Completed', time: 'Oct 19, 11:33:02', dir: 'in' },
-  { type: 'Deposit', amount: '+150.00 USDT', status: 'Completed', time: 'Oct 18, 16:51:47', dir: 'in' },
+  {
+    type: 'Deposit',
+    dir: 'in',
+    asset: 'USDT',
+    network: 'TRC20',
+    amount: '500.00',
+    status: 'completed',
+    date: 'Oct 24, 2023',
+    hash: '0x4a...2e1c',
+  },
+  {
+    type: 'Deposit',
+    dir: 'in',
+    asset: 'USDT',
+    network: 'TRC20',
+    amount: '500.00',
+    status: 'completed',
+    date: 'Oct 24, 2023',
+    hash: '0x4a...2e1c',
+  },
+  {
+    type: 'Withdraw',
+    dir: 'out',
+    asset: 'USDT',
+    network: 'TRC20',
+    amount: '500.00',
+    status: 'failed',
+    date: 'Oct 24, 2023',
+    hash: '0x4a...2e1c',
+  },
+  {
+    type: 'Processing',
+    dir: 'out',
+    asset: 'USDT',
+    network: 'TRC20',
+    amount: '500.00',
+    status: 'pending',
+    date: 'Oct 24, 2023',
+    hash: '0x4a...2e1c',
+  },
+  {
+    type: 'Deposit',
+    dir: 'in',
+    asset: 'USDT',
+    network: 'TRC20',
+    amount: '500.00',
+    status: 'completed',
+    date: 'Oct 24, 2023',
+    hash: '0x4a...2e1c',
+  },
+  {
+    type: 'Deposit',
+    dir: 'in',
+    asset: 'USDT',
+    network: 'TRC20',
+    amount: '500.00',
+    status: 'completed',
+    date: 'Oct 24, 2023',
+    hash: '0x4a...2e1c',
+  },
 ]
 
-export default function Balance() {
+const NETWORKS = [
+  { value: 'trc20', label: 'Tron (TRC20)' },
+  { value: 'erc20', label: 'Ethereum (ERC20)' },
+  { value: 'bep20', label: 'BNB Smart Chain (BEP20)' },
+  { value: 'sol', label: 'Solana (SPL)' },
+]
+
+const ADDRESS = 'TQ3h9f7v...2kL9sP1xZ'
+
+function PlusIcon() {
   return (
-    <>
-      <section className="content-card" style={{ gap: 28 }}>
-        <h1 className="page-title">Balance</h1>
-        <p className="page-subtitle">
-          Manage your funds — deposit, withdraw and review your wallet activity.
-        </p>
+    <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+      <path d="M8 3v10M3 8h10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+    </svg>
+  )
+}
 
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(3, 1fr)',
-            gap: 16,
-            marginTop: 8,
-          }}
-        >
-          <div
-            style={{
-              background: 'var(--app-row-bg)',
-              borderRadius: 12,
-              padding: 24,
-              border: '1px solid rgba(0,255,163,0.15)',
-            }}
-          >
-            <div
-              style={{
-                font: '700 11px/1 var(--app-font)',
-                letterSpacing: '0.6px',
-                textTransform: 'uppercase',
-                color: 'var(--app-text-muted)',
-                marginBottom: 12,
-              }}
-            >
-              Total Balance
-            </div>
-            <div
-              style={{
-                font: '900 32px/1 var(--app-font)',
-                color: 'var(--app-text)',
-                marginBottom: 4,
-              }}
-            >
-              1,530.45{' '}
-              <span style={{ font: '600 14px/1 var(--app-font)', color: 'var(--app-text-muted)' }}>
-                USDT
-              </span>
-            </div>
-            <div className="cell--up" style={{ font: '700 13px/1 var(--app-font)' }}>
-              +12.4% this week
-            </div>
-          </div>
+function ArrowDownIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+      <path
+        d="M8 3v10M4 9l4 4 4-4"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  )
+}
 
-          <div
-            style={{
-              background: 'var(--app-row-bg)',
-              borderRadius: 12,
-              padding: 24,
-              border: '1px solid rgba(0,255,163,0.15)',
-            }}
-          >
-            <div
-              style={{
-                font: '700 11px/1 var(--app-font)',
-                letterSpacing: '0.6px',
-                textTransform: 'uppercase',
-                color: 'var(--app-text-muted)',
-                marginBottom: 12,
-              }}
-            >
-              Available
-            </div>
-            <div
-              style={{
-                font: '900 32px/1 var(--app-font)',
-                color: 'var(--app-text)',
-                marginBottom: 16,
-              }}
-            >
-              1,280.45{' '}
-              <span style={{ font: '600 14px/1 var(--app-font)', color: 'var(--app-text-muted)' }}>
-                USDT
-              </span>
-            </div>
-            <div style={{ display: 'flex', gap: 8 }}>
-              <button
-                type="button"
-                style={{
-                  background: 'var(--app-accent)',
-                  color: '#0b0f14',
-                  border: 0,
-                  borderRadius: 8,
-                  padding: '10px 18px',
-                  font: '900 12px/1 var(--app-font)',
-                  letterSpacing: '1px',
-                  textTransform: 'uppercase',
-                  cursor: 'pointer',
-                  flex: 1,
-                }}
-              >
-                Deposit
-              </button>
-              <button
-                type="button"
-                style={{
-                  background: 'transparent',
-                  color: 'var(--app-text)',
-                  border: '1px solid var(--app-border-soft)',
-                  borderRadius: 8,
-                  padding: '10px 18px',
-                  font: '900 12px/1 var(--app-font)',
-                  letterSpacing: '1px',
-                  textTransform: 'uppercase',
-                  cursor: 'pointer',
-                  flex: 1,
-                }}
-              >
-                Withdraw
-              </button>
-            </div>
-          </div>
+function ArrowInIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+      <path
+        d="M3 13l10-10M13 9V3H7"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  )
+}
 
-          <div
-            style={{
-              background: 'var(--app-row-bg)',
-              borderRadius: 12,
-              padding: 24,
-              border: '1px solid rgba(0,255,163,0.15)',
-            }}
-          >
-            <div
-              style={{
-                font: '700 11px/1 var(--app-font)',
-                letterSpacing: '0.6px',
-                textTransform: 'uppercase',
-                color: 'var(--app-text-muted)',
-                marginBottom: 12,
-              }}
-            >
-              In trades
-            </div>
-            <div
-              style={{
-                font: '900 32px/1 var(--app-font)',
-                color: 'var(--app-text)',
-                marginBottom: 4,
-              }}
-            >
-              250.00{' '}
-              <span style={{ font: '600 14px/1 var(--app-font)', color: 'var(--app-text-muted)' }}>
-                USDT
-              </span>
-            </div>
-            <div style={{ font: '600 13px/1 var(--app-font)', color: 'var(--app-text-muted)' }}>
-              5 open positions
-            </div>
-          </div>
+function ArrowOutIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+      <path
+        d="M13 3L3 13M3 7v6h6"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  )
+}
+
+function CopyIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+      <rect x="5" y="5" width="9" height="9" rx="1.5" stroke="currentColor" strokeWidth="1.5" />
+      <path
+        d="M11 5V3.5A1.5 1.5 0 0 0 9.5 2h-6A1.5 1.5 0 0 0 2 3.5v6A1.5 1.5 0 0 0 3.5 11H5"
+        stroke="currentColor"
+        strokeWidth="1.5"
+      />
+    </svg>
+  )
+}
+
+function DownloadIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+      <path
+        d="M8 2v9M4 7l4 4 4-4M3 13h10"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  )
+}
+
+function WarningIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+      <path
+        d="M8 6v3M8 11.5h.01M2.7 13h10.6c.8 0 1.3-.9.9-1.6L8.9 2.5a1 1 0 0 0-1.7 0L1.8 11.4c-.4.7.1 1.6.9 1.6Z"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  )
+}
+
+export default function Balance() {
+  const [network, setNetwork] = useState('trc20')
+  const [page, setPage] = useState(1)
+  const [copied, setCopied] = useState(false)
+
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(ADDRESS)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 1200)
+    } catch {
+      // ignore — older browsers without clipboard API
+    }
+  }
+
+  const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?data=${encodeURIComponent(
+    ADDRESS,
+  )}&size=200x200&margin=0`
+
+  const PAGE_SIZE = 4
+  const visible = TX.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
+
+  return (
+    <div className="balance-page">
+      {/* -------------------- Header -------------------- */}
+      <header className="balance-page__header">
+        <div className="balance-page__header-text">
+          <h1 className="page-title">Balance</h1>
+          <p className="page-subtitle">
+            Manage your funds and recent transactions across all networks.
+          </p>
         </div>
-      </section>
+        <div className="balance-page__actions">
+          <button type="button" className="balance-action-btn balance-action-btn--primary">
+            <PlusIcon /> Deposit
+          </button>
+          <button type="button" className="balance-action-btn">
+            <ArrowDownIcon /> Withdraw
+          </button>
+        </div>
+      </header>
 
-      <section className="content-card">
-        <h2 className="page-title" style={{ fontSize: 24, lineHeight: '28px' }}>
-          Transactions
-        </h2>
+      {/* -------------------- Total Balance + Quick Stats -------------------- */}
+      <div className="balance-page__top-grid">
+        <section className="content-card balance-total">
+          <div className="balance-total__bg-mark" aria-hidden="true" />
+          <div className="balance-total__label">Total Balance</div>
+          <div className="balance-total__amount">
+            12,450.80<span>USDT</span>
+          </div>
+          <div className="balance-total__row">
+            <div>
+              <div className="balance-total__row-label">Available</div>
+              <div className="balance-total__row-value">10,200.00</div>
+            </div>
+            <div>
+              <div className="balance-total__row-label">Locked</div>
+              <div className="balance-total__row-value">2,250.80</div>
+            </div>
+            <div>
+              <div className="balance-total__row-label">24h Change</div>
+              <div className="balance-total__row-value cell--up">+5.24%</div>
+            </div>
+          </div>
+        </section>
 
-        <div className="data-table">
-          <div
-            className="data-table__head"
-            style={{ gridTemplateColumns: '1fr 1fr 1fr 1fr' }}
-          >
-            <span>Type</span>
-            <span>Amount</span>
-            <span>Status</span>
-            <span>Time</span>
+        <section className="content-card balance-stats">
+          <h3 className="card__title">Quick Stats</h3>
+          <div className="balance-stats__list">
+            <div className="balance-stats__row">
+              <span>Estimated BTC</span>
+              <b>0.1932 BTC</b>
+            </div>
+            <div className="balance-stats__row">
+              <span>Staking Yield</span>
+              <b className="cell--up">+0.045 ETH</b>
+            </div>
+            <div className="balance-stats__row">
+              <span>Trading PNL</span>
+              <b className="cell--up">+$124.00</b>
+            </div>
+          </div>
+          <button type="button" className="balance-stats__analytics">
+            View Analytics
+          </button>
+        </section>
+      </div>
+
+      {/* -------------------- Deposit + Transactions -------------------- */}
+      <div className="balance-page__bottom-grid">
+        <section className="content-card balance-deposit">
+          <h3 className="balance-deposit__title">
+            <DownloadIcon /> Deposit USDT
+          </h3>
+
+          <div>
+            <div className="balance-deposit__network-label">Network Selector</div>
+            <div className="balance-deposit__network">
+              <select value={network} onChange={(e) => setNetwork(e.target.value)}>
+                {NETWORKS.map((n) => (
+                  <option key={n.value} value={n.value}>
+                    {n.label}
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
 
-          {TX.map((t, i) => (
-            <div
-              key={i}
-              className="data-table__row"
-              style={{ gridTemplateColumns: '1fr 1fr 1fr 1fr' }}
-            >
-              <span className="cell">{t.type}</span>
-              <span className={`cell ${t.dir === 'in' ? 'cell--up' : 'cell--down'}`}>
-                {t.amount}
-              </span>
-              <span className="cell" style={{ color: t.status === 'Pending' ? '#fbbf24' : 'var(--app-accent)' }}>
-                {t.status}
-              </span>
-              <span className="cell" style={{ color: 'var(--app-text-muted)', fontSize: 12 }}>
-                {t.time}
-              </span>
-            </div>
-          ))}
-        </div>
+          <div className="balance-deposit__qr">
+            <img src={qrUrl} alt={`QR code for ${ADDRESS}`} />
+          </div>
 
-        <Pagination total={24} page={1} pageSize={6} />
-      </section>
-    </>
+          <div className="balance-deposit__address">
+            <code>{ADDRESS}</code>
+            <button
+              type="button"
+              className="balance-deposit__copy"
+              onClick={handleCopy}
+              aria-label="Copy deposit address"
+            >
+              <CopyIcon />
+            </button>
+          </div>
+          {copied && (
+            <div style={{ font: '600 11px/1 var(--app-font)', color: 'var(--app-accent)' }}>
+              Address copied to clipboard.
+            </div>
+          )}
+
+          <div className="balance-deposit__warning">
+            <WarningIcon /> Send only <strong>USDT via TRC20</strong> to this address. Sending
+            any other coin or using another network may result in permanent loss.
+          </div>
+        </section>
+
+        <section className="content-card balance-tx">
+          <header className="balance-tx__header">
+            <h3 className="balance-tx__title">Recent Transactions</h3>
+            <a className="balance-tx__csv">Download CSV</a>
+          </header>
+
+          <div className="balance-tx__list">
+            {visible.map((t, i) => (
+              <div key={i} className="balance-tx__row">
+                <span
+                  className={`balance-tx__type${
+                    t.dir === 'out' ? ' balance-tx__type--out' : ''
+                  }`}
+                >
+                  {t.dir === 'in' ? <ArrowInIcon /> : <ArrowOutIcon />} {t.type}
+                </span>
+                <span className="balance-tx__asset">
+                  {t.asset}
+                  <span>{t.network}</span>
+                </span>
+                <span className="balance-tx__amount">{t.amount}</span>
+                <span>
+                  <span className={`balance-tx__status balance-tx__status--${t.status}`}>
+                    {t.status}
+                  </span>
+                </span>
+                <span className="balance-tx__date">{t.date}</span>
+                <span className="balance-tx__hash">{t.hash}</span>
+              </div>
+            ))}
+          </div>
+
+          <Pagination
+            total={TX.length * 4}
+            page={page}
+            pageSize={PAGE_SIZE}
+            onPage={setPage}
+          />
+        </section>
+      </div>
+    </div>
   )
 }

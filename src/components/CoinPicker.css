@@ -1,0 +1,191 @@
+/* Coin picker — custom dropdown for selecting one of the 100 coins. */
+
+.coin-picker {
+  position: relative;
+  display: inline-block;
+  width: 100%;
+}
+
+.coin-picker__trigger {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 8px 14px;
+  background: var(--app-row-bg);
+  border: 1px solid var(--app-border-soft);
+  border-radius: 10px;
+  color: var(--app-text);
+  font: 700 14px/1 var(--app-font);
+  cursor: pointer;
+  transition: border-color 0.15s ease, background-color 0.15s ease;
+}
+
+.coin-picker__trigger:hover,
+.coin-picker__trigger.is-open {
+  border-color: var(--app-accent);
+  background: rgba(0, 255, 163, 0.04);
+}
+
+.coin-picker__label {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 1px;
+}
+
+.coin-picker__symbol {
+  color: var(--app-text);
+  font: 800 14px/1 var(--app-font);
+}
+
+.coin-picker__pair {
+  color: var(--app-text-muted);
+  font: 600 12px/1 var(--app-font);
+}
+
+.coin-picker__name {
+  flex: 1;
+  text-align: left;
+  color: var(--app-text-muted);
+  font: 500 12px/1 var(--app-font);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.coin-picker__chevron {
+  color: var(--app-text-muted);
+  flex-shrink: 0;
+  transition: transform 0.15s ease;
+}
+
+.coin-picker__trigger.is-open .coin-picker__chevron {
+  transform: rotate(180deg);
+}
+
+/* Popover */
+.coin-picker__popover {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  z-index: 50;
+  background: #0b0f14;
+  border: 1px solid var(--app-border);
+  border-radius: 12px;
+  padding: 8px;
+  box-shadow:
+    0 18px 40px rgba(0, 0, 0, 0.55),
+    0 0 0 1px rgba(0, 255, 163, 0.08);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 380px;
+  overflow: hidden;
+}
+
+.coin-picker__search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  background: var(--app-row-bg);
+  border: 1px solid var(--app-border-soft);
+  border-radius: 8px;
+  color: var(--app-text-muted);
+  flex-shrink: 0;
+}
+
+.coin-picker__search input {
+  flex: 1;
+  background: transparent;
+  border: 0;
+  outline: 0;
+  color: var(--app-text);
+  font: 500 13px/1 var(--app-font);
+}
+
+.coin-picker__search input::placeholder {
+  color: var(--app-text-dim);
+}
+
+.coin-picker__list {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding-right: 2px;
+}
+
+/* Custom scrollbar for the coin list */
+.coin-picker__list::-webkit-scrollbar {
+  width: 6px;
+}
+.coin-picker__list::-webkit-scrollbar-track {
+  background: transparent;
+}
+.coin-picker__list::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 3px;
+}
+.coin-picker__list::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.coin-picker__row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  background: transparent;
+  border: 0;
+  border-radius: 8px;
+  text-align: left;
+  color: var(--app-text);
+  font: 500 13px/1.2 var(--app-font);
+  cursor: pointer;
+  transition: background-color 0.1s ease;
+}
+
+.coin-picker__row:hover {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.coin-picker__row.is-active {
+  background: rgba(0, 255, 163, 0.1);
+}
+
+.coin-picker__row-text {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  flex: 1;
+  min-width: 0;
+}
+
+.coin-picker__row-symbol {
+  font: 800 13px/1 var(--app-font);
+  color: var(--app-text);
+}
+
+.coin-picker__row-name {
+  font: 500 11px/1 var(--app-font);
+  color: var(--app-text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.coin-picker__row-pair {
+  font: 600 11px/1 var(--app-font);
+  color: var(--app-text-dim);
+  flex-shrink: 0;
+}
+
+.coin-picker__empty {
+  padding: 20px 12px;
+  text-align: center;
+  color: var(--app-text-muted);
+  font: 500 13px/1.4 var(--app-font);
+}

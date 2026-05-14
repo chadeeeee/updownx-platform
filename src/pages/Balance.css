@@ -1,0 +1,456 @@
+/* Balance page — funds dashboard */
+
+.balance-page {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* -------------------- Header (title + top actions) -------------------- */
+.balance-page__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+
+.balance-page__header-text {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.balance-page__actions {
+  display: flex;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.balance-action-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 22px;
+  border-radius: 10px;
+  font: 800 13px/1 var(--app-font);
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  border: 1px solid var(--app-border-soft);
+  background: var(--app-row-bg);
+  color: var(--app-text);
+  transition: filter 0.15s ease, border-color 0.15s ease;
+}
+
+.balance-action-btn--primary {
+  background: var(--app-accent);
+  border-color: var(--app-accent);
+  color: #05070a;
+  box-shadow: 0 0 18px rgba(0, 255, 163, 0.35);
+}
+
+.balance-action-btn--primary:hover {
+  filter: brightness(1.05);
+}
+
+.balance-action-btn:hover {
+  border-color: var(--app-accent);
+}
+
+/* -------------------- Top grid: Total Balance + Quick Stats -------------------- */
+.balance-page__top-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 16px;
+  align-items: stretch;
+}
+
+.balance-total,
+.balance-stats {
+  padding: 22px 28px;
+  gap: 16px;
+}
+
+.balance-total {
+  position: relative;
+  overflow: hidden;
+}
+
+.balance-total__bg-mark {
+  position: absolute;
+  right: 32px;
+  bottom: 0;
+  width: 220px;
+  height: 220px;
+  pointer-events: none;
+  opacity: 0.12;
+  background:
+    radial-gradient(circle at 50% 50%, rgba(0, 255, 163, 0.6) 0%, transparent 60%);
+  z-index: 0;
+}
+
+.balance-total > * {
+  position: relative;
+  z-index: 1;
+}
+
+.balance-total__label {
+  font: 700 12px/1 var(--app-font);
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  color: var(--app-text-muted);
+}
+
+.balance-total__amount {
+  font: 900 48px/1 var(--app-font);
+  color: var(--app-text);
+  letter-spacing: -1.2px;
+}
+
+.balance-total__amount span {
+  font: 800 22px/1 var(--app-font);
+  color: var(--app-accent);
+  letter-spacing: 0;
+  margin-left: 10px;
+}
+
+.balance-total__row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+  margin-top: 6px;
+}
+
+.balance-total__row-label {
+  font: 700 10px/1 var(--app-font);
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  color: var(--app-text-muted);
+  margin-bottom: 6px;
+}
+
+.balance-total__row-value {
+  font: 900 18px/1 var(--app-font);
+  color: var(--app-text);
+}
+
+.balance-total__row-value.cell--up {
+  color: var(--app-accent);
+}
+
+/* -------------------- Quick Stats card -------------------- */
+.balance-stats {
+  display: flex;
+  flex-direction: column;
+}
+
+.balance-stats__list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  flex: 1;
+}
+
+.balance-stats__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font: 600 13px/1 var(--app-font);
+  color: var(--app-text-muted);
+}
+
+.balance-stats__row b {
+  font: 800 13px/1 var(--app-font);
+  color: var(--app-text);
+}
+
+.balance-stats__row .cell--up {
+  color: var(--app-accent);
+}
+
+.balance-stats__analytics {
+  width: 100%;
+  margin-top: 12px;
+  background: var(--app-row-bg);
+  border: 1px solid var(--app-border-soft);
+  border-radius: 8px;
+  padding: 10px 14px;
+  font: 800 11px/1 var(--app-font);
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  color: var(--app-text);
+  cursor: pointer;
+  transition: border-color 0.15s ease;
+}
+
+.balance-stats__analytics:hover {
+  border-color: var(--app-accent);
+  color: var(--app-accent);
+}
+
+/* -------------------- Bottom grid: Deposit + Transactions -------------------- */
+.balance-page__bottom-grid {
+  display: grid;
+  grid-template-columns: minmax(320px, 380px) 1fr;
+  gap: 16px;
+  align-items: stretch;
+}
+
+/* -------------------- Deposit panel -------------------- */
+.balance-deposit {
+  padding: 22px 24px;
+  gap: 14px;
+}
+
+.balance-deposit__title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 4px;
+  font: 800 16px/1 var(--app-font);
+  color: var(--app-text);
+}
+
+.balance-deposit__title svg {
+  color: var(--app-accent);
+}
+
+.balance-deposit__network-label {
+  font: 700 10px/1 var(--app-font);
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  color: var(--app-text-muted);
+  margin-bottom: 4px;
+}
+
+.balance-deposit__network {
+  position: relative;
+  display: flex;
+  align-items: center;
+  background: var(--app-row-bg);
+  border: 1px solid var(--app-border-soft);
+  border-radius: 10px;
+  padding: 0;
+}
+
+.balance-deposit__network select {
+  flex: 1;
+  appearance: none;
+  background: transparent;
+  border: 0;
+  padding: 12px 36px 12px 14px;
+  color: var(--app-text);
+  font: 700 13px/1 var(--app-font);
+  cursor: pointer;
+  outline: none;
+}
+
+.balance-deposit__network::after {
+  content: '';
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  width: 8px;
+  height: 8px;
+  border-right: 2px solid var(--app-text-muted);
+  border-bottom: 2px solid var(--app-text-muted);
+  transform: translateY(-70%) rotate(45deg);
+  pointer-events: none;
+}
+
+.balance-deposit__qr {
+  align-self: center;
+  width: 200px;
+  height: 200px;
+  background: #fff;
+  border-radius: 12px;
+  padding: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.balance-deposit__qr img {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.balance-deposit__address {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--app-row-bg);
+  border: 1px solid var(--app-border-soft);
+  border-radius: 10px;
+  padding: 10px 12px;
+}
+
+.balance-deposit__address code {
+  flex: 1;
+  font: 600 12px/1.2 'JetBrains Mono', ui-monospace, monospace;
+  color: var(--app-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.balance-deposit__copy {
+  background: transparent;
+  border: 0;
+  color: var(--app-text-muted);
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 6px;
+  display: inline-flex;
+}
+
+.balance-deposit__copy:hover {
+  color: var(--app-accent);
+  background: rgba(0, 255, 163, 0.08);
+}
+
+.balance-deposit__warning {
+  background: rgba(255, 59, 59, 0.08);
+  border: 1px solid rgba(255, 59, 59, 0.25);
+  border-radius: 10px;
+  padding: 12px 14px;
+  font: 600 11px/1.5 var(--app-font);
+  color: #ff8080;
+}
+
+.balance-deposit__warning strong {
+  color: var(--app-danger);
+  font-weight: 800;
+}
+
+/* -------------------- Recent Transactions panel -------------------- */
+.balance-tx {
+  padding: 22px 28px;
+  gap: 14px;
+}
+
+.balance-tx__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.balance-tx__title {
+  margin: 0;
+  font: 800 18px/1 var(--app-font);
+  color: var(--app-text);
+}
+
+.balance-tx__csv {
+  font: 700 12px/1 var(--app-font);
+  color: var(--app-accent);
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.balance-tx__csv:hover {
+  text-decoration: underline;
+}
+
+.balance-tx__list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.balance-tx__row {
+  display: grid;
+  grid-template-columns: 110px 90px 90px 100px 110px 90px;
+  align-items: center;
+  gap: 8px;
+  background: var(--app-row-bg);
+  border: 1px solid rgba(44, 246, 195, 0.12);
+  border-radius: 8px;
+  padding: 10px 14px;
+}
+
+.balance-tx__type {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font: 700 13px/1 var(--app-font);
+  color: var(--app-text);
+}
+
+.balance-tx__type svg {
+  color: var(--app-accent);
+}
+
+.balance-tx__type--out svg {
+  color: #fbbf24;
+}
+
+.balance-tx__asset {
+  font: 700 11px/1.3 var(--app-font);
+  color: var(--app-text);
+}
+
+.balance-tx__asset span {
+  display: block;
+  font: 500 10px/1 var(--app-font);
+  color: var(--app-text-muted);
+  margin-top: 2px;
+}
+
+.balance-tx__amount {
+  font: 800 13px/1 var(--app-font);
+  color: var(--app-text);
+}
+
+.balance-tx__date {
+  font: 600 11px/1 var(--app-font);
+  color: var(--app-text-muted);
+  text-align: right;
+}
+
+.balance-tx__hash {
+  font: 600 11px/1 'JetBrains Mono', ui-monospace, monospace;
+  color: var(--app-text-muted);
+  text-align: right;
+}
+
+.balance-tx__status {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 5px 12px;
+  border-radius: 9999px;
+  font: 800 9px/1 var(--app-font);
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+}
+
+.balance-tx__status--completed {
+  background: rgba(0, 255, 163, 0.12);
+  border: 1px solid rgba(0, 255, 163, 0.3);
+  color: var(--app-accent);
+}
+
+.balance-tx__status--pending {
+  background: rgba(251, 191, 36, 0.12);
+  border: 1px solid rgba(251, 191, 36, 0.3);
+  color: #fbbf24;
+}
+
+.balance-tx__status--failed {
+  background: rgba(255, 59, 59, 0.12);
+  border: 1px solid rgba(255, 59, 59, 0.3);
+  color: var(--app-danger);
+}
+
+@media (max-width: 1100px) {
+  .balance-page__top-grid,
+  .balance-page__bottom-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .balance-tx__row {
+    grid-template-columns: 1fr 1fr;
+  }
+}

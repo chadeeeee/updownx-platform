@@ -22,8 +22,21 @@
 
 .trading-chart-card {
   padding: 12px;
-  gap: 0;
-  overflow: hidden;
+  gap: 12px;
+  overflow: visible; /* let CoinPicker popover escape */
+}
+
+.trading-chart-card__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.trading-chart-card__picker {
+  width: 320px;
+  max-width: 100%;
 }
 
 .trading-chart-card .tradingview-widget-container {
@@ -33,37 +46,38 @@
 }
 
 .trading-trade {
-  gap: 14px;
+  gap: 16px;
+  padding: 18px 20px;
 }
 
 .trading-trade__row {
   display: flex;
   align-items: center;
-  margin-bottom: 8px;
+  margin-bottom: 10px;
 }
 
 .trading-trade__label {
-  font: 700 11px/1 var(--app-font);
+  font: 700 12px/1 var(--app-font);
   letter-spacing: 0.6px;
-  text-transform: uppercase;
+  text-transform: capitalize;
   color: var(--app-text-muted);
 }
 
 .trading-trade__amounts {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 6px;
+  gap: 8px;
 }
 
 .amount-btn {
-  background: transparent;
+  background: var(--app-row-bg);
   border: 1px solid var(--app-border-soft);
-  border-radius: 6px;
-  padding: 8px 0;
-  font: 700 13px/1 var(--app-font);
+  border-radius: 8px;
+  padding: 12px 0;
+  font: 700 14px/1 var(--app-font);
   color: var(--app-text);
   cursor: pointer;
-  transition: border-color 0.15s ease, color 0.15s ease;
+  transition: border-color 0.15s ease, color 0.15s ease, background-color 0.15s ease;
 }
 
 .amount-btn:hover {
@@ -73,28 +87,31 @@
 .amount-btn.is-active {
   border-color: var(--app-accent);
   color: var(--app-accent);
+  background: rgba(0, 255, 163, 0.06);
 }
 
 .trading-trade__progress {
-  height: 4px;
+  height: 6px;
   background: var(--app-border-soft);
-  border-radius: 2px;
+  border-radius: 3px;
   overflow: hidden;
+  margin-top: 4px;
 }
 
 .trading-trade__progress-fill {
   height: 100%;
   width: 35%;
   background: var(--app-accent);
-  border-radius: 2px;
+  border-radius: 3px;
+  box-shadow: 0 0 8px rgba(0, 255, 163, 0.5);
 }
 
 .trade-cta {
   width: 100%;
   border: 0;
-  border-radius: 8px;
-  padding: 14px 0;
-  font: 900 16px/1 var(--app-font);
+  border-radius: 10px;
+  padding: 18px 0;
+  font: 900 22px/1 var(--app-font);
   letter-spacing: 1.5px;
   text-transform: uppercase;
   cursor: pointer;
@@ -108,26 +125,27 @@
 
 .trade-cta--up {
   background: var(--app-accent);
-  box-shadow: 0 0 20px rgba(0, 255, 163, 0.3);
+  box-shadow: 0 0 30px rgba(0, 255, 163, 0.45);
 }
 
 .trade-cta--down {
   background: var(--app-danger);
-  box-shadow: 0 0 20px rgba(255, 59, 59, 0.3);
+  color: #fff;
+  box-shadow: 0 0 30px rgba(255, 59, 59, 0.4);
 }
 
 .balance-btn {
   flex: 1;
-  background: transparent;
+  background: var(--app-row-bg);
   border: 1px solid var(--app-border-soft);
   border-radius: 8px;
-  padding: 10px 14px;
-  font: 700 11px/1 var(--app-font);
-  letter-spacing: 0.6px;
+  padding: 12px 14px;
+  font: 800 11px/1 var(--app-font);
+  letter-spacing: 1.2px;
   text-transform: uppercase;
   color: var(--app-text);
   cursor: pointer;
-  transition: border-color 0.15s ease;
+  transition: border-color 0.15s ease, background-color 0.15s ease;
 }
 
 .balance-btn:hover {
@@ -138,20 +156,133 @@
   background: var(--app-accent);
   border-color: var(--app-accent);
   color: #0b0f14;
+  box-shadow: 0 0 16px rgba(0, 255, 163, 0.3);
 }
 
 .balance-btn--primary:hover {
   filter: brightness(1.05);
 }
 
+/* -------------------- BULL VS BEAR (sidebar tournament card) -------------------- */
 .trading-tournament {
-  background: linear-gradient(180deg, #05070a 0%, rgba(0, 255, 163, 0.04) 100%);
+  background:
+    radial-gradient(circle at 0% 0%, rgba(0, 255, 163, 0.18) 0%, transparent 60%),
+    radial-gradient(circle at 100% 100%, rgba(0, 255, 163, 0.08) 0%, transparent 60%),
+    linear-gradient(180deg, #061a14 0%, #051210 100%);
+  padding: 16px 18px;
+  gap: 18px;
+  border-color: rgba(0, 255, 163, 0.35);
 }
 
 .trading-tournament__header {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
+  gap: 12px;
+}
+
+.trading-tournament__title {
+  font: 900 22px/1.05 var(--app-font);
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  background: linear-gradient(90deg, #00ffa3 0%, #cdfff0 70%, #ffd9b8 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-bottom: 6px;
+}
+
+.trading-tournament__subtitle {
+  font: 600 12px/1 var(--app-font);
+  color: var(--app-accent);
+  letter-spacing: 0.4px;
+}
+
+.trading-tournament__live {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 10px;
+  border: 1px solid rgba(0, 255, 163, 0.4);
+  border-radius: 6px;
+  background: rgba(0, 255, 163, 0.06);
+  font: 800 11px/1 var(--app-font);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--app-accent);
+  flex-shrink: 0;
+}
+
+.trading-tournament__live::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--app-accent);
+  box-shadow: 0 0 6px var(--app-accent);
+}
+
+.trading-tournament__bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.trading-tournament__prize-label {
+  font: 700 10px/1 var(--app-font);
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  color: var(--app-text-muted);
+  margin-bottom: 6px;
+}
+
+.trading-tournament__prize-amount {
+  font: 900 26px/1 var(--app-font);
+  color: var(--app-text);
+  letter-spacing: -0.5px;
+}
+
+.trading-tournament__prize-amount span {
+  font: 700 13px/1 var(--app-font);
+  color: var(--app-text-muted);
+  margin-left: 4px;
+}
+
+.trading-tournament__cta {
+  background: var(--app-accent);
+  color: #05070a;
+  border: 0;
+  border-radius: 8px;
+  padding: 12px 22px;
+  font: 900 12px/1 var(--app-font);
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  cursor: pointer;
+  box-shadow: 0 0 18px rgba(0, 255, 163, 0.4);
+  transition: filter 0.15s ease;
+}
+
+.trading-tournament__cta:hover {
+  filter: brightness(1.05);
+}
+
+/* -------------------- Your Balance card -------------------- */
+.trading-balance-card {
+  padding: 16px 18px;
+  gap: 14px;
+}
+
+.trading-balance-amount {
+  font: 900 28px/1 var(--app-font);
+  color: var(--app-text);
+  letter-spacing: -0.5px;
+}
+
+.trading-balance-amount span {
+  font: 700 13px/1 var(--app-font);
+  color: var(--app-accent);
+  margin-left: 6px;
 }
 
 .trading-positions {

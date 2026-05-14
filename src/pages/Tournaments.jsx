@@ -120,7 +120,7 @@ export default function Tournaments() {
 
         <div className="warriors-grid">
           {WARRIORS.map((w, i) => (
-            <article key={i} className="warrior-card">
+            <article key={i} className={`warrior-card warrior-card--${i + 1}`}>
               <div className="warrior-card__bg" />
               <div className="warrior-card__body">
                 <h3 className="warrior-card__title">{w.title}</h3>

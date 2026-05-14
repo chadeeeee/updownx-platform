@@ -1,6 +1,6 @@
 import { useState } from 'react'
-import { Pill } from './_shared'
 import CoinIcon from '../components/CoinIcon'
+import CoinPicker from '../components/CoinPicker'
 import TradingViewChart from '../components/TradingViewChart'
 import { COINS } from '../data/coins'
 import '../components/AppLayout.css'
@@ -34,6 +34,11 @@ export default function Trading() {
       {/* LEFT COLUMN — chart + positions */}
       <div className="trading-main">
         <section className="content-card trading-chart-card">
+          <div className="trading-chart-card__header">
+            <div className="trading-chart-card__picker">
+              <CoinPicker value={activeSymbol} onChange={setActiveSymbol} />
+            </div>
+          </div>
           <TradingViewChart symbol={activeCoin.tv} interval="5" height={520} />
         </section>
 
@@ -155,13 +160,10 @@ export default function Trading() {
           </button>
         </section>
 
-        <section className="card">
+        <section className="card trading-balance-card">
           <h3 className="card__title">Your Balance</h3>
-          <div style={{ font: '900 24px/1 var(--app-font)', color: 'var(--app-text)' }}>
-            1,530.45{' '}
-            <span style={{ font: '600 13px/1 var(--app-font)', color: 'var(--app-text-muted)' }}>
-              USDT
-            </span>
+          <div className="trading-balance-amount">
+            1,530.45<span>USDT</span>
           </div>
           <div style={{ display: 'flex', gap: 8 }}>
             <button type="button" className="balance-btn">
@@ -176,46 +178,19 @@ export default function Trading() {
         <section className="card trading-tournament">
           <div className="trading-tournament__header">
             <div>
-              <div
-                style={{
-                  font: '900 18px/1 var(--app-font)',
-                  background: 'linear-gradient(90deg, #00ffa3 0%, #fef787 50%, #ff3b3b 100%)',
-                  WebkitBackgroundClip: 'text',
-                  backgroundClip: 'text',
-                  WebkitTextFillColor: 'transparent',
-                  marginBottom: 4,
-                }}
-              >
-                Bull vs Bear
-              </div>
-              <div style={{ font: '600 11px/1 var(--app-font)', color: 'var(--app-text-muted)' }}>
-                Current Tournament
-              </div>
+              <div className="trading-tournament__title">Bull vs Bear</div>
+              <div className="trading-tournament__subtitle">Current Tournament</div>
             </div>
-            <Pill kind="win">Live</Pill>
+            <span className="trading-tournament__live">Live</span>
           </div>
-          <div>
-            <div
-              style={{
-                font: '700 11px/1 var(--app-font)',
-                letterSpacing: '0.6px',
-                textTransform: 'uppercase',
-                color: 'var(--app-text-muted)',
-                marginBottom: 6,
-              }}
-            >
-              Prize pool
+          <div className="trading-tournament__bottom">
+            <div>
+              <div className="trading-tournament__prize-label">Prize Pool</div>
+              <div className="trading-tournament__prize-amount">
+                5,000<span>USDT</span>
+              </div>
             </div>
-            <div
-              style={{
-                font: '900 28px/1 var(--app-font)',
-                color: 'var(--app-accent)',
-                marginBottom: 12,
-              }}
-            >
-              5,000 <span style={{ fontSize: 14, color: 'var(--app-text-muted)' }}>USDT</span>
-            </div>
-            <button type="button" className="balance-btn balance-btn--primary" style={{ width: '100%' }}>
+            <button type="button" className="trading-tournament__cta">
               Join Now
             </button>
           </div>
