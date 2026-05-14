@@ -11,15 +11,17 @@ const NAV_LINKS = [
   { to: '/balance', label: 'Balance' },
   { to: '/tournaments', label: 'Tournaments' },
   { to: '/history', label: 'History' },
-  { to: '/account', label: 'Account' },
+  { to: '/account', label: 'Settings' },
 ]
 
-// Live Trades — sample of recent fills for various coins.
-const SIDEBAR_TRADES = TRADE_COINS.slice(0, 6).map((coin, i) => ({
-  symbol: coin.symbol,
-  amount: i === 2 ? '-$48.20' : '+$140.50',
-  dir: i === 2 ? 'down' : 'up',
-}))
+// Live Trades — sample of recent user fills.
+const SIDEBAR_TRADES = [
+  { userId: 'id_user334...', amount: '+$140.50', dir: 'up', avatar: 1 },
+  { userId: 'id_user334...', amount: '+$140.50', dir: 'up', avatar: 2 },
+  { userId: 'id_user334...', amount: '+$140.50', dir: 'up', avatar: 3 },
+  { userId: 'id_user334...', amount: '+$140.50', dir: 'up', avatar: 4 },
+  { userId: 'id_user334...', amount: '+$140.50', dir: 'up', avatar: 5 },
+]
 
 function SearchIcon() {
   return (
@@ -79,6 +81,14 @@ function MarketsCard({ tickers }) {
   )
 }
 
+function UserIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+      <path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"/>
+    </svg>
+  )
+}
+
 function LiveTradesCard() {
   return (
     <section className="card">
@@ -86,10 +96,14 @@ function LiveTradesCard() {
       <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
         {SIDEBAR_TRADES.map((t, i) => (
           <div key={i} className="market-row">
-            <CoinIcon symbol={t.symbol} />
+            <span
+              className={`trader-avatar trader-avatar--${t.avatar}`}
+              style={{ color: 'rgba(255,255,255,0.8)' }}
+            >
+              <UserIcon />
+            </span>
             <span className="market-row__name">
-              <span className="market-row__symbol">{t.symbol}</span>
-              <span className="market-row__pair">/USDT</span>
+              <span className="market-row__symbol" style={{ fontSize: 11 }}>{t.userId}</span>
             </span>
             <span className={`market-row__change ${t.dir === 'up' ? 'is-up' : 'is-down'}`}>
               {t.amount}
@@ -105,7 +119,7 @@ export default function AppLayout() {
   // No real auth state yet — buttons live on the right side of the
   // header, taking the spot of balance/deposit when the user is
   // logged out.
-  const isAuthenticated = false
+  const isAuthenticated = true
   const { tickers } = useBinancePrices()
 
   return (
@@ -144,7 +158,9 @@ export default function AppLayout() {
                 Deposit
               </Link>
               <Link to="/account" className="app-header__avatar" aria-label="Account">
-                U
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                  <path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"/>
+                </svg>
               </Link>
               <button type="button" className="app-header__logout" aria-label="Log out">
                 <LogoutIcon />

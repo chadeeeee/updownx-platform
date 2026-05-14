@@ -55,6 +55,8 @@
   box-shadow:
     inset 0 0 0 1px rgba(44, 246, 195, 0.05),
     0 12px 32px rgba(0, 0, 0, 0.5);
+  display: flex;
+  flex-direction: column;
 }
 
 .tournament-banner__bg {
@@ -80,7 +82,7 @@
   flex-direction: column;
   align-items: center;
   gap: 8px;
-  height: 100%;
+  flex: 1;
 }
 
 .tournament-banner__title {
@@ -127,10 +129,8 @@
 }
 
 .tournament-banner__bottom {
-  position: absolute;
-  left: 36px;
-  right: 36px;
-  bottom: 28px;
+  margin-top: auto;
+  width: 100%;
   display: flex;
   align-items: flex-end;
   justify-content: space-between;

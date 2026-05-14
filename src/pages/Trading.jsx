@@ -8,6 +8,15 @@ import './Trading.css'
 
 const AMOUNTS = [10, 50, 100, 250]
 const TABS = ['Open positions', 'History', 'Orders']
+const INTERVALS = [
+  { label: '1m', value: '1' },
+  { label: '5m', value: '5' },
+  { label: '15m', value: '15' },
+  { label: '30m', value: '30' },
+  { label: '1h', value: '60' },
+  { label: '4h', value: '240' },
+  { label: '1D', value: 'D' },
+]
 
 const POSITIONS = [
   { symbol: 'BTC', time: '00:32', invest: 50, profit: 72, dir: 'up' },
@@ -16,16 +25,17 @@ const POSITIONS = [
   { symbol: 'XRP', time: '00:32', invest: 50, profit: 72, dir: 'up' },
 ]
 
-const TOP_COINS = [
-  { rank: 1, symbol: 'BTC', change: '+12.5%', amount: '+$140.50' },
-  { rank: 2, symbol: 'ETH', change: '+8.2%', amount: '+$98.20' },
-  { rank: 3, symbol: 'SOL', change: '+5.4%', amount: '+$56.40' },
+const TOP_TRADERS = [
+  { rank: 1, name: 'NovaX', amount: '+$140.50', avatar: 1 },
+  { rank: 2, name: 'BitLrd', amount: '+$140.50', avatar: 2 },
+  { rank: 3, name: 'ZenMaster', amount: '+$140.50', avatar: 3 },
 ]
 
 export default function Trading() {
   const [amount, setAmount] = useState(50)
   const [tab, setTab] = useState('Open positions')
   const [activeSymbol, setActiveSymbol] = useState('BTC')
+  const [chartInterval, setChartInterval] = useState('5')
 
   const activeCoin = COINS.find((c) => c.symbol === activeSymbol) ?? COINS[0]
 
@@ -37,9 +47,22 @@ export default function Trading() {
           <div className="trading-chart-card__header">
             <div className="trading-chart-card__picker">
               <CoinPicker value={activeSymbol} onChange={setActiveSymbol} />
+              <span className="trading-chart-card__change">+70.5%</span>
+            </div>
+            <div className="trading-chart-card__intervals">
+              {INTERVALS.map((it) => (
+                <button
+                  key={it.value}
+                  type="button"
+                  className={`interval-btn${chartInterval === it.value ? ' is-active' : ''}`}
+                  onClick={() => setChartInterval(it.value)}
+                >
+                  {it.label}
+                </button>
+              ))}
             </div>
           </div>
-          <TradingViewChart symbol={activeCoin.tv} interval="5" height={520} />
+          <TradingViewChart symbol={activeCoin.tv} interval={chartInterval} height={520} />
         </section>
 
         <section className="content-card trading-positions">
@@ -153,10 +176,10 @@ export default function Trading() {
           </div>
 
           <button type="button" className="trade-cta trade-cta--up">
-            Up
+            UP
           </button>
           <button type="button" className="trade-cta trade-cta--down">
-            Down
+            DOWN
           </button>
         </section>
 
@@ -197,44 +220,41 @@ export default function Trading() {
         </section>
 
         <section className="card">
-          <h3 className="card__title">Top Coins</h3>
-          {TOP_COINS.map((c) => (
-            <button
-              key={c.rank}
-              type="button"
+          <h3 className="card__title">Top Traders</h3>
+          {TOP_TRADERS.map((t) => (
+            <div
+              key={t.rank}
               className="market-row"
-              style={{
-                background: 'var(--app-row-bg)',
-                border: 0,
-                cursor: 'pointer',
-                width: '100%',
-                color: 'inherit',
-              }}
-              onClick={() => setActiveSymbol(c.symbol)}
+              style={{ background: 'var(--app-row-bg)' }}
             >
               <span
                 className="cell"
                 style={{
                   width: 18,
                   fontSize: 10,
-                  color: c.rank === 1 ? 'var(--app-accent)' : 'var(--app-text-dim)',
+                  color: t.rank === 1 ? 'var(--app-accent)' : 'var(--app-text-dim)',
                 }}
               >
-                #{c.rank}
+                #{t.rank}
               </span>
-              <CoinIcon symbol={c.symbol} />
-              <span className="market-row__name" style={{ flexDirection: 'column', alignItems: 'flex-start' }}>
+              <span className={`trader-avatar trader-avatar--${t.avatar}`}>
+                {t.name.slice(0, 1)}
+              </span>
+              <span
+                className="market-row__name"
+                style={{ flexDirection: 'column', alignItems: 'flex-start' }}
+              >
                 <span style={{ font: '700 12px/1.2 var(--app-font)', color: '#fff' }}>
-                  {c.symbol}/USDT
+                  {t.name}
                 </span>
                 <span style={{ font: '400 9px/1.2 var(--app-font)', color: 'var(--app-text-muted)' }}>
                   24h Performance
                 </span>
               </span>
               <span className="cell--up" style={{ font: '700 12px/1 var(--app-font)' }}>
-                {c.amount}
+                {t.amount}
               </span>
-            </button>
+            </div>
           ))}
         </section>
       </div>
