@@ -14,7 +14,8 @@
   --auth-text-strong: #f0f2f5;
   --auth-text-muted: #a6aabe;
   --auth-text-dim: #8b949e;
-  --auth-radius: 12px;
+  --auth-radius: 999px;
+  --auth-radius-card: 18px;
   --auth-font: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
 }
 
@@ -249,7 +250,7 @@
   background: transparent;
   border: 0;
   outline: 0;
-  padding: 16px 16px;
+  padding: 16px 24px;
   color: var(--auth-text);
   font: 400 16px/24px var(--auth-font);
 }
@@ -260,7 +261,7 @@
 }
 
 .auth-input--with-leading input {
-  padding-left: 48px;
+  padding-left: 52px;
 }
 
 .auth-input--with-trailing input {
@@ -273,7 +274,7 @@
 
 .auth-input__icon {
   position: absolute;
-  left: 18px;
+  left: 22px;
   top: 50%;
   transform: translateY(-50%);
   color: var(--auth-text-dim);
@@ -444,4 +445,43 @@
     bottom: 8px;
     transform: none;
   }
+}
+
+/* -------------------- Inline status & errors -------------------- */
+.auth-helper {
+  margin-top: 8px;
+  font: 600 12px/1.4 var(--auth-font);
+}
+
+.auth-helper--success {
+  color: var(--auth-accent);
+}
+
+.auth-helper--error {
+  color: #ff6b6b;
+}
+
+.auth-helper--sending,
+.auth-helper--idle {
+  color: var(--auth-text-muted);
+}
+
+.auth-error {
+  margin-top: 6px;
+  padding: 12px 18px;
+  border: 1px solid rgba(255, 80, 80, 0.35);
+  background: rgba(255, 80, 80, 0.08);
+  border-radius: var(--auth-radius-card);
+  color: #ff8080;
+  font: 600 12px/1.4 var(--auth-font);
+}
+
+.auth-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.auth-input__inline-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }

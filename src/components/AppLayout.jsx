@@ -1,25 +1,26 @@
-import { NavLink, Link, Outlet } from 'react-router-dom'
+import { useEffect, useMemo, useState } from 'react'
+import { NavLink, Link, Outlet, useNavigate } from 'react-router-dom'
 import CoinIcon from './CoinIcon'
+import UserAvatar from './UserAvatar'
 import useBinancePrices, { formatChange } from '../hooks/useBinancePrices'
 import { SIDEBAR_COINS, TRADE_COINS } from '../data/coins'
+import { randomTraderName } from '../data/liveTraders'
+import { useAuth } from '../context/AuthContext'
+import { useMarket } from '../context/MarketContext'
 import logoImg from '../assets/logo.svg'
 import './AppLayout.css'
 
-const NAV_LINKS = [
+const PUBLIC_NAV = [
   { to: '/trading', label: 'Trading' },
   { to: '/markets', label: 'Markets' },
-  { to: '/balance', label: 'Balance' },
   { to: '/tournaments', label: 'Tournaments' },
+]
+
+const PRIVATE_NAV = [
+  { to: '/balance', label: 'Balance' },
   { to: '/history', label: 'History' },
   { to: '/account', label: 'Account' },
 ]
-
-// Live Trades — sample of recent fills for various coins.
-const SIDEBAR_TRADES = TRADE_COINS.slice(0, 6).map((coin, i) => ({
-  symbol: coin.symbol,
-  amount: i === 2 ? '-$48.20' : '+$140.50',
-  dir: i === 2 ? 'down' : 'up',
-}))
 
 function SearchIcon() {
   return (
@@ -45,20 +46,49 @@ function LogoutIcon() {
 }
 
 function MarketsCard({ tickers }) {
+  const { symbol: activeSymbol, setSymbol } = useMarket()
+  const [search, setSearch] = useState('')
+  const navigate = useNavigate()
+
+  const items = useMemo(() => {
+    const q = search.trim().toLowerCase()
+    if (!q) return SIDEBAR_COINS
+    return SIDEBAR_COINS.filter(
+      (c) =>
+        c.symbol.toLowerCase().includes(q) || c.name.toLowerCase().includes(q),
+    )
+  }, [search])
+
+  const handlePick = (coin) => {
+    setSymbol(coin.symbol)
+    navigate('/trading')
+  }
+
   return (
     <section className="card">
       <h3 className="card__title">Markets</h3>
       <label className="search">
         <SearchIcon />
-        <input type="search" placeholder="Search..." />
+        <input
+          type="search"
+          placeholder="Search..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+        />
       </label>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-        {SIDEBAR_COINS.map((coin) => {
+      <div className="market-list">
+        {items.map((coin) => {
           const t = tickers[`${coin.symbol}USDT`]
           const change = t ? t.priceChangePercent : null
           const isUp = change != null && change >= 0
+          const isActive = coin.symbol === activeSymbol
           return (
-            <div key={coin.symbol} className="market-row">
+            <button
+              key={coin.symbol}
+              type="button"
+              className={`market-row market-row--button${isActive ? ' is-active' : ''}`}
+              onClick={() => handlePick(coin)}
+            >
               <CoinIcon symbol={coin.symbol} />
               <span className="market-row__name">
                 <span className="market-row__symbol">{coin.symbol}</span>
@@ -71,28 +101,62 @@ function MarketsCard({ tickers }) {
               >
                 {formatChange(change)}
               </span>
-            </div>
+            </button>
           )
         })}
+        {items.length === 0 && (
+          <div className="market-list__empty">No matches.</div>
+        )}
       </div>
     </section>
   )
 }
 
+const MAX_TRADES = 8
+
+function generateTrade() {
+  const coin = TRADE_COINS[Math.floor(Math.random() * TRADE_COINS.length)]
+  const isWin = Math.random() > 0.4
+  const dir = Math.random() > 0.5 ? 'up' : 'down'
+  // Stake between $5–$500 to keep amounts realistic in the sidebar feed.
+  const stake = Math.round((5 + Math.random() * 495) * 100) / 100
+  const amount = isWin ? stake * 0.5 : -stake
+  return {
+    id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+    name: randomTraderName(),
+    symbol: coin.symbol,
+    dir,
+    amount,
+    isWin,
+  }
+}
+
 function LiveTradesCard() {
+  const [trades, setTrades] = useState(() =>
+    Array.from({ length: MAX_TRADES }, () => generateTrade()),
+  )
+
+  useEffect(() => {
+    const id = setInterval(() => {
+      setTrades((prev) => [generateTrade(), ...prev].slice(0, MAX_TRADES))
+    }, 2200)
+    return () => clearInterval(id)
+  }, [])
+
   return (
     <section className="card">
       <h3 className="card__title">Live Trades</h3>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-        {SIDEBAR_TRADES.map((t, i) => (
-          <div key={i} className="market-row">
-            <CoinIcon symbol={t.symbol} />
+      <div className="market-list live-trades">
+        {trades.map((t) => (
+          <div key={t.id} className="market-row live-trade-row">
+            <UserAvatar name={t.name} />
             <span className="market-row__name">
-              <span className="market-row__symbol">{t.symbol}</span>
-              <span className="market-row__pair">/USDT</span>
+              <span className="market-row__symbol">{t.name}</span>
+              <span className="market-row__pair">{t.symbol}/USDT</span>
             </span>
-            <span className={`market-row__change ${t.dir === 'up' ? 'is-up' : 'is-down'}`}>
-              {t.amount}
+            <span className={`market-row__change ${t.isWin ? 'is-up' : 'is-down'}`}>
+              {t.isWin ? '+' : ''}
+              {t.amount.toFixed(2)}$
             </span>
           </div>
         ))}
@@ -102,11 +166,16 @@ function LiveTradesCard() {
 }
 
 export default function AppLayout() {
-  // No real auth state yet — buttons live on the right side of the
-  // header, taking the spot of balance/deposit when the user is
-  // logged out.
-  const isAuthenticated = false
+  const { isAuthenticated, user, logout } = useAuth()
+  const navigate = useNavigate()
   const { tickers } = useBinancePrices()
+
+  const navLinks = isAuthenticated ? [...PUBLIC_NAV, ...PRIVATE_NAV] : PUBLIC_NAV
+
+  const handleLogout = () => {
+    logout()
+    navigate('/trading')
+  }
 
   return (
     <div className="app-shell">
@@ -118,7 +187,7 @@ export default function AppLayout() {
         </div>
 
         <nav className="app-header__nav">
-          {NAV_LINKS.map((link) => (
+          {navLinks.map((link) => (
             <NavLink
               key={link.to}
               to={link.to}
@@ -143,10 +212,20 @@ export default function AppLayout() {
               <Link to="/balance" className="app-header__deposit">
                 Deposit
               </Link>
-              <Link to="/account" className="app-header__avatar" aria-label="Account">
-                U
+              <Link
+                to="/account"
+                className="app-header__avatar"
+                aria-label="Account"
+                title={user?.email || 'Account'}
+              >
+                {user?.name ? user.name[0].toUpperCase() : 'U'}
               </Link>
-              <button type="button" className="app-header__logout" aria-label="Log out">
+              <button
+                type="button"
+                className="app-header__logout"
+                aria-label="Log out"
+                onClick={handleLogout}
+              >
                 <LogoutIcon />
               </button>
             </>

@@ -288,3 +288,146 @@
 .trading-positions {
   padding: 20px 24px;
 }
+
+/* -------------------- Stake input + inline messages -------------------- */
+.trading-trade__input {
+  width: 100%;
+  margin-top: 10px;
+  background: var(--app-row-bg);
+  border: 1px solid var(--app-border-soft);
+  border-radius: 8px;
+  padding: 10px 14px;
+  color: var(--app-text);
+  font: 800 16px/1 var(--app-font);
+  outline: none;
+  text-align: right;
+  transition: border-color 0.15s ease;
+}
+
+.trading-trade__input:focus {
+  border-color: var(--app-accent);
+  box-shadow: 0 0 0 2px rgba(0, 255, 163, 0.12);
+}
+
+.trading-trade__inline-error,
+.trading-trade__inline-success {
+  font: 700 11px/1.4 var(--app-font);
+  padding: 8px 12px;
+  border-radius: 8px;
+}
+
+.trading-trade__inline-error {
+  background: rgba(255, 80, 80, 0.08);
+  border: 1px solid rgba(255, 80, 80, 0.25);
+  color: #ff8080;
+}
+
+.trading-trade__inline-success {
+  background: rgba(0, 255, 163, 0.08);
+  border: 1px solid rgba(0, 255, 163, 0.3);
+  color: var(--app-accent);
+}
+
+/* -------------------- Auth-CTA card (replaces Trade panel) -------------------- */
+.trading-cta-card {
+  text-align: center;
+  align-items: stretch;
+}
+
+.trading-cta-card__text {
+  margin: 0 0 8px;
+  font: 600 13px/1.5 var(--app-font);
+  color: var(--app-text-muted);
+}
+
+/* -------------------- Position table extras -------------------- */
+.data-table__empty {
+  padding: 32px 16px;
+  text-align: center;
+  color: var(--app-text-muted);
+  font: 600 13px/1.4 var(--app-font);
+}
+
+.tab__badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 8px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: 9999px;
+  background: var(--app-accent);
+  color: #05070a;
+  font: 900 10px/1 var(--app-font);
+}
+
+.trading-progress {
+  display: inline-block;
+  width: 90px;
+  height: 6px;
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.08);
+  overflow: hidden;
+  vertical-align: middle;
+}
+
+.trading-progress__fill {
+  display: block;
+  height: 100%;
+  background: linear-gradient(90deg, var(--app-accent), #2cf6c3);
+  transition: width 0.6s linear;
+}
+
+.trade-status {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px 10px;
+  border-radius: 9999px;
+  font: 900 10px/1 var(--app-font);
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+}
+
+.trade-status--won {
+  background: rgba(0, 255, 163, 0.12);
+  border: 1px solid rgba(0, 255, 163, 0.35);
+  color: var(--app-accent);
+}
+
+.trade-status--lost {
+  background: rgba(255, 80, 80, 0.12);
+  border: 1px solid rgba(255, 80, 80, 0.35);
+  color: #ff8080;
+}
+
+.trade-status--cancelled {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: var(--app-text-muted);
+}
+
+.pill--up {
+  background: rgba(0, 255, 163, 0.12);
+  border: 1px solid rgba(0, 255, 163, 0.35);
+  color: var(--app-accent);
+  display: inline-flex;
+  padding: 4px 10px;
+  border-radius: 9999px;
+  font: 800 10px/1 var(--app-font);
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+}
+
+.pill--down {
+  background: rgba(255, 80, 80, 0.12);
+  border: 1px solid rgba(255, 80, 80, 0.35);
+  color: #ff8080;
+  display: inline-flex;
+  padding: 4px 10px;
+  border-radius: 9999px;
+  font: 800 10px/1 var(--app-font);
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+}

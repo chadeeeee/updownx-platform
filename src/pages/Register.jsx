@@ -1,9 +1,17 @@
-import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { useEffect, useState } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
 import laptop from '../assets/auth/laptop.png'
+import Toast from '../components/Toast'
+import { useAuth } from '../context/AuthContext'
 import './auth.css'
 
+const RESEND_COOLDOWN_SECONDS = 30
+const EMAIL_RX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+
 export default function Register() {
+  const navigate = useNavigate()
+  const { register, sendCode } = useAuth()
+
   const [form, setForm] = useState({
     name: '',
     surname: '',
@@ -14,21 +22,98 @@ export default function Register() {
     invite: '',
   })
 
+  const [codeStatus, setCodeStatus] = useState({ kind: 'idle', message: '' })
+  const [codeCooldown, setCodeCooldown] = useState(0)
+  const [submitting, setSubmitting] = useState(false)
+  const [submitError, setSubmitError] = useState(null)
+  const [toast, setToast] = useState(null)
+
+  // Cooldown countdown for the "Get code" button.
+  useEffect(() => {
+    if (codeCooldown <= 0) return undefined
+    const id = setInterval(() => {
+      setCodeCooldown((s) => Math.max(0, s - 1))
+    }, 1000)
+    return () => clearInterval(id)
+  }, [codeCooldown])
+
   const update = (key) => (e) => setForm((f) => ({ ...f, [key]: e.target.value }))
 
-  const handleSubmit = (e) => {
-    e.preventDefault()
-    // TODO: hook up real registration
-    console.log('Registration attempt:', { ...form, password: '***', confirm: '***' })
+  const isEmailValid = EMAIL_RX.test(form.email.trim())
+  const canRequestCode = isEmailValid && codeCooldown === 0 && codeStatus.kind !== 'sending'
+
+  const handleGetCode = async () => {
+    if (!canRequestCode) return
+    setCodeStatus({ kind: 'sending', message: 'Sending code…' })
+    try {
+      await sendCode(form.email.trim().toLowerCase())
+      setCodeStatus({ kind: 'idle', message: '' })
+      setToast({
+        kind: 'success',
+        message: 'Code sent — check your inbox (and spam).',
+        id: Date.now(),
+      })
+      setCodeCooldown(RESEND_COOLDOWN_SECONDS)
+    } catch (err) {
+      setCodeStatus({ kind: 'idle', message: '' })
+      setToast({
+        kind: 'error',
+        message: err?.message || 'Failed to send verification code.',
+        id: Date.now(),
+      })
+    }
   }
 
-  const handleGetCode = () => {
-    // TODO: trigger email verification code request
-    console.log('Get code for:', form.email)
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+    if (submitting) return
+
+    setSubmitError(null)
+
+    if (!form.name.trim() || !form.surname.trim()) {
+      return setSubmitError('Name and surname are required.')
+    }
+    if (!isEmailValid) {
+      return setSubmitError('Please enter a valid e-mail.')
+    }
+    if (!form.code.trim()) {
+      return setSubmitError('Verification code is required — press "Get code" first.')
+    }
+    if (form.password.length < 6) {
+      return setSubmitError('Password must be at least 6 characters.')
+    }
+    if (form.password !== form.confirm) {
+      return setSubmitError('Passwords do not match.')
+    }
+
+    setSubmitting(true)
+    try {
+      await register({
+        name: form.name.trim(),
+        surname: form.surname.trim(),
+        email: form.email.trim().toLowerCase(),
+        password: form.password,
+        verificationCode: form.code.trim(),
+        invitationCode: form.invite.trim() || undefined,
+      })
+      navigate('/trading', { replace: true })
+    } catch (err) {
+      setSubmitError(err?.message || 'Registration failed.')
+    } finally {
+      setSubmitting(false)
+    }
   }
 
   return (
     <div className="auth-page">
+      {toast && (
+        <Toast
+          key={toast.id}
+          kind={toast.kind}
+          message={toast.message}
+          onClose={() => setToast(null)}
+        />
+      )}
       <div className="auth-showcase" aria-hidden="true">
         <img src={laptop} alt="" />
       </div>
@@ -91,11 +176,20 @@ export default function Register() {
                   type="button"
                   className="auth-input__inline-btn"
                   onClick={handleGetCode}
-                  disabled={!form.email}
+                  disabled={!canRequestCode}
                 >
-                  Get code
+                  {codeStatus.kind === 'sending'
+                    ? 'Sending…'
+                    : codeCooldown > 0
+                      ? `Resend (${codeCooldown}s)`
+                      : 'Get code'}
                 </button>
               </div>
+              {codeStatus.kind === 'sending' && (
+                <div className="auth-helper auth-helper--sending" role="status">
+                  {codeStatus.message}
+                </div>
+              )}
             </div>
 
             <div className="auth-field">
@@ -110,6 +204,7 @@ export default function Register() {
                   autoComplete="one-time-code"
                   value={form.code}
                   onChange={update('code')}
+                  placeholder="6-digit code from e-mail"
                 />
               </div>
             </div>
@@ -161,8 +256,14 @@ export default function Register() {
               </div>
             </div>
 
-            <button type="submit" className="auth-button auth-button--strong">
-              Registration
+            {submitError && <div className="auth-error">{submitError}</div>}
+
+            <button
+              type="submit"
+              className="auth-button auth-button--strong"
+              disabled={submitting}
+            >
+              {submitting ? 'Registering…' : 'Registration'}
             </button>
           </form>
 

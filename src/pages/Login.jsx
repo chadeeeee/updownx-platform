@@ -1,15 +1,20 @@
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import logo from '../assets/auth/logo.svg'
 import laptop from '../assets/auth/laptop.png'
+import { useAuth } from '../context/AuthContext'
 import './auth.css'
 
-function UserIcon() {
+function MailIcon() {
   return (
-    <svg width="15" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+    <svg width="15" height="15" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+      <rect x="1.5" y="3" width="13" height="10" rx="1.5" stroke="currentColor" strokeWidth="1.5" />
       <path
-        d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6Zm0 1.5c-2.49 0-7.5 1.25-7.5 3.75V14a.5.5 0 0 0 .5.5h14a.5.5 0 0 0 .5-.5v-.75c0-2.5-5.01-3.75-7.5-3.75Z"
-        fill="currentColor"
+        d="M2 4.5 8 9l6-4.5"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
       />
     </svg>
   )
@@ -48,14 +53,31 @@ function EyeIcon({ open }) {
 }
 
 export default function Login() {
-  const [accountId, setAccountId] = useState('')
+  const navigate = useNavigate()
+  const location = useLocation()
+  const { login } = useAuth()
+  const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
+  const [submitting, setSubmitting] = useState(false)
+  const [error, setError] = useState(null)
 
-  const handleSubmit = (e) => {
+  const redirectTo = location.state?.from?.pathname || '/trading'
+
+  const handleSubmit = async (e) => {
     e.preventDefault()
-    // TODO: hook up real authentication
-    console.log('Sign in attempt:', { accountId })
+    if (submitting) return
+
+    setError(null)
+    setSubmitting(true)
+    try {
+      await login({ email: email.trim(), password })
+      navigate(redirectTo, { replace: true })
+    } catch (err) {
+      setError(err?.message || 'Login failed.')
+    } finally {
+      setSubmitting(false)
+    }
   }
 
   return (
@@ -73,21 +95,21 @@ export default function Login() {
 
           <form className="auth-form" onSubmit={handleSubmit} noValidate>
             <div className="auth-field">
-              <label className="auth-label" htmlFor="accountId">
-                Account ID / Login
+              <label className="auth-label" htmlFor="email">
+                E-mail
               </label>
               <div className="auth-input auth-input--with-leading">
                 <span className="auth-input__icon">
-                  <UserIcon />
+                  <MailIcon />
                 </span>
                 <input
-                  id="accountId"
-                  type="text"
-                  inputMode="numeric"
-                  autoComplete="username"
-                  placeholder="398064"
-                  value={accountId}
-                  onChange={(e) => setAccountId(e.target.value)}
+                  id="email"
+                  type="email"
+                  autoComplete="email"
+                  placeholder="you@example.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
                 />
               </div>
             </div>
@@ -110,6 +132,7 @@ export default function Login() {
                   placeholder="••••••••"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
+                  required
                 />
                 <button
                   type="button"
@@ -123,8 +146,10 @@ export default function Login() {
               </div>
             </div>
 
-            <button type="submit" className="auth-button">
-              Sign In
+            {error && <div className="auth-error">{error}</div>}
+
+            <button type="submit" className="auth-button" disabled={submitting}>
+              {submitting ? 'Signing in…' : 'Sign In'}
             </button>
           </form>
 
