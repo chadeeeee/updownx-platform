@@ -18,7 +18,21 @@ import {
 import '../components/AppLayout.css'
 import './Trading.css'
 
+<<<<<<< HEAD
 const STAKE_PRESETS = [10, 50, 250, 500]
+=======
+const AMOUNTS = [10, 50, 100, 250]
+const TABS = ['Open positions', 'History', 'Orders']
+const INTERVALS = [
+  { label: '1m', value: '1' },
+  { label: '5m', value: '5' },
+  { label: '15m', value: '15' },
+  { label: '30m', value: '30' },
+  { label: '1h', value: '60' },
+  { label: '4h', value: '240' },
+  { label: '1D', value: 'D' },
+]
+>>>>>>> f2080c6932ae2cf7cf18700224531092c8146a30
 
 // Quick-select buttons mirror the broker-style picker (S = seconds, M = minutes, H = hours).
 const DURATION_PRESETS = [
@@ -33,6 +47,7 @@ const DURATION_PRESETS = [
   { value: 14400, label: 'H4' },
 ]
 
+<<<<<<< HEAD
 const DURATION_MIN = 3
 const DURATION_MAX = 24 * 3600
 
@@ -423,6 +438,19 @@ export default function Trading() {
   const { isAuthenticated } = useAuth()
   const { symbol: activeSymbol, setSymbol } = useMarket()
   const { balance, openPositions, closedPositions } = useTrading()
+=======
+const TOP_TRADERS = [
+  { rank: 1, name: 'NovaX', amount: '+$140.50', avatar: 1 },
+  { rank: 2, name: 'BitLrd', amount: '+$140.50', avatar: 2 },
+  { rank: 3, name: 'ZenMaster', amount: '+$140.50', avatar: 3 },
+]
+
+export default function Trading() {
+  const [amount, setAmount] = useState(50)
+  const [tab, setTab] = useState('Open positions')
+  const [activeSymbol, setActiveSymbol] = useState('BTC')
+  const [chartInterval, setChartInterval] = useState('5')
+>>>>>>> f2080c6932ae2cf7cf18700224531092c8146a30
 
   const [tab, setTab] = useState('Open positions')
   const [now, setNow] = useState(Date.now())
@@ -447,10 +475,27 @@ export default function Trading() {
         <section className="content-card trading-chart-card">
           <div className="trading-chart-card__header">
             <div className="trading-chart-card__picker">
+<<<<<<< HEAD
               <CoinPicker value={activeSymbol} onChange={setSymbol} />
+=======
+              <CoinPicker value={activeSymbol} onChange={setActiveSymbol} />
+              <span className="trading-chart-card__change">+70.5%</span>
+            </div>
+            <div className="trading-chart-card__intervals">
+              {INTERVALS.map((it) => (
+                <button
+                  key={it.value}
+                  type="button"
+                  className={`interval-btn${chartInterval === it.value ? ' is-active' : ''}`}
+                  onClick={() => setChartInterval(it.value)}
+                >
+                  {it.label}
+                </button>
+              ))}
+>>>>>>> f2080c6932ae2cf7cf18700224531092c8146a30
             </div>
           </div>
-          <TradingViewChart symbol={activeCoin.tv} interval="5" height={520} />
+          <TradingViewChart symbol={activeCoin.tv} interval={chartInterval} height={520} />
         </section>
 
         <section className="content-card trading-positions">
@@ -501,6 +546,7 @@ export default function Trading() {
       </div>
 
       <div className="trading-side">
+<<<<<<< HEAD
         {isAuthenticated ? (
           <>
             <TradePanel activeSymbol={activeSymbol} />
@@ -509,6 +555,81 @@ export default function Trading() {
         ) : (
           <TradeAuthCta />
         )}
+=======
+        <section className="card trading-trade">
+          <h3 className="card__title">Trade</h3>
+          <div>
+            <div className="trading-trade__row">
+              <span className="trading-trade__label">Amount</span>
+            </div>
+            <div className="trading-trade__amounts">
+              {AMOUNTS.map((v) => (
+                <button
+                  key={v}
+                  type="button"
+                  className={`amount-btn${amount === v ? ' is-active' : ''}`}
+                  onClick={() => setAmount(v)}
+                >
+                  {v}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div>
+            <div className="trading-trade__row" style={{ justifyContent: 'space-between' }}>
+              <span className="trading-trade__label">Timer</span>
+              <span style={{ font: '900 18px/1 var(--app-font)', color: 'var(--app-text)' }}>
+                00:32
+              </span>
+            </div>
+            <div className="trading-trade__progress">
+              <div className="trading-trade__progress-fill" />
+            </div>
+          </div>
+
+          <div className="trading-trade__row" style={{ justifyContent: 'space-between' }}>
+            <div>
+              <div className="trading-trade__label" style={{ marginBottom: 2 }}>
+                Payout
+              </div>
+              <div style={{ font: '700 13px/1 var(--app-font)', color: 'var(--app-text)' }}>
+                85%
+              </div>
+            </div>
+            <div style={{ textAlign: 'right' }}>
+              <div className="trading-trade__label" style={{ marginBottom: 2 }}>
+                Amount
+              </div>
+              <div style={{ font: '700 13px/1 var(--app-font)', color: 'var(--app-text)' }}>
+                ${(amount * 1.85).toFixed(2)}
+              </div>
+            </div>
+          </div>
+
+          <button type="button" className="trade-cta trade-cta--up">
+            UP
+          </button>
+          <button type="button" className="trade-cta trade-cta--down">
+            DOWN
+          </button>
+        </section>
+
+        <section className="card trading-balance-card">
+          <h3 className="card__title">Your Balance</h3>
+          <div className="trading-balance-amount">
+            1,530.45<span>USDT</span>
+          </div>
+          <div style={{ display: 'flex', gap: 8 }}>
+            <button type="button" className="balance-btn">
+              Withdraw
+            </button>
+            <button type="button" className="balance-btn balance-btn--primary">
+              Deposit
+            </button>
+          </div>
+        </section>
+>>>>>>> f2080c6932ae2cf7cf18700224531092c8146a30
 
         <section className="card trading-tournament">
           <div className="trading-tournament__header">
@@ -530,6 +651,48 @@ export default function Trading() {
             </Link>
           </div>
         </section>
+<<<<<<< HEAD
+=======
+
+        <section className="card">
+          <h3 className="card__title">Top Traders</h3>
+          {TOP_TRADERS.map((t) => (
+            <div
+              key={t.rank}
+              className="market-row"
+              style={{ background: 'var(--app-row-bg)' }}
+            >
+              <span
+                className="cell"
+                style={{
+                  width: 18,
+                  fontSize: 10,
+                  color: t.rank === 1 ? 'var(--app-accent)' : 'var(--app-text-dim)',
+                }}
+              >
+                #{t.rank}
+              </span>
+              <span className={`trader-avatar trader-avatar--${t.avatar}`}>
+                {t.name.slice(0, 1)}
+              </span>
+              <span
+                className="market-row__name"
+                style={{ flexDirection: 'column', alignItems: 'flex-start' }}
+              >
+                <span style={{ font: '700 12px/1.2 var(--app-font)', color: '#fff' }}>
+                  {t.name}
+                </span>
+                <span style={{ font: '400 9px/1.2 var(--app-font)', color: 'var(--app-text-muted)' }}>
+                  24h Performance
+                </span>
+              </span>
+              <span className="cell--up" style={{ font: '700 12px/1 var(--app-font)' }}>
+                {t.amount}
+              </span>
+            </div>
+          ))}
+        </section>
+>>>>>>> f2080c6932ae2cf7cf18700224531092c8146a30
       </div>
     </div>
   )

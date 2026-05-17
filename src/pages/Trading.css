@@ -35,8 +35,54 @@
 }
 
 .trading-chart-card__picker {
-  width: 320px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
   max-width: 100%;
+}
+
+.trading-chart-card__picker .coin-picker {
+  width: 220px;
+}
+
+.trading-chart-card__change {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 6px;
+  background: rgba(0, 255, 163, 0.12);
+  color: var(--app-accent);
+  font: 700 12px/1 var(--app-font);
+  letter-spacing: 0.4px;
+  flex-shrink: 0;
+}
+
+.trading-chart-card__intervals {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.interval-btn {
+  background: transparent;
+  border: 0;
+  padding: 6px 10px;
+  font: 700 12px/1 var(--app-font);
+  letter-spacing: 0.3px;
+  color: var(--app-text-muted);
+  cursor: pointer;
+  border-radius: 6px;
+  transition: color 0.15s ease, background-color 0.15s ease;
+}
+
+.interval-btn:hover {
+  color: var(--app-text);
+}
+
+.interval-btn.is-active {
+  color: var(--app-accent);
+  background: rgba(0, 255, 163, 0.08);
 }
 
 .trading-chart-card .tradingview-widget-container {

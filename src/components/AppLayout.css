@@ -33,14 +33,14 @@
   overflow-x: hidden;
 }
 
-/* Subtle green corner glow */
+/* Green corner glows */
 .app-shell::before {
   content: '';
   position: fixed;
   inset: 0;
   background:
-    radial-gradient(60% 50% at 0% 100%, rgba(44, 246, 195, 0.10) 0%, transparent 60%),
-    radial-gradient(55% 50% at 100% 0%, rgba(0, 255, 163, 0.06) 0%, transparent 60%);
+    radial-gradient(65% 55% at 0% 100%, rgba(44, 246, 195, 0.18) 0%, transparent 65%),
+    radial-gradient(50% 40% at 100% 0%, rgba(0, 255, 163, 0.09) 0%, transparent 60%);
   pointer-events: none;
   z-index: 0;
 }
@@ -54,7 +54,7 @@
   align-items: center;
   gap: 24px;
   padding: 12px 30px;
-  background: #0b0f14;
+  background: var(--app-bg);
   border-bottom: 1px solid var(--app-border);
 }
 
@@ -261,6 +261,11 @@
   gap: 16px;
   position: sticky;
   top: 24px;
+  align-self: stretch;
+}
+
+.app-sidebar .card:last-child {
+  flex: 1;
 }
 
 .card {
@@ -552,7 +557,7 @@
 
 .pill--down {
   background: var(--app-danger);
-  color: #05070a;
+  color: #fff;
   filter: drop-shadow(0 0 7.5px rgba(255, 59, 59, 0.3));
   padding: 4px 12px;
   font-weight: 700;
@@ -571,6 +576,8 @@
   border: 0;
   padding: 10px 4px;
   font: 700 13px/1 var(--app-font);
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
   color: var(--app-text-muted);
   cursor: pointer;
   border-bottom: 2px solid transparent;
