@@ -7,6 +7,8 @@ import { SIDEBAR_COINS, TRADE_COINS } from '../data/coins'
 import { randomTraderName } from '../data/liveTraders'
 import { useAuth } from '../context/AuthContext'
 import { useMarket } from '../context/MarketContext'
+import { useTrading } from '../context/TradingContext'
+import useAvatar from '../hooks/useAvatar'
 import logoImg from '../assets/logo.svg'
 import './AppLayout.css'
 
@@ -169,6 +171,8 @@ export default function AppLayout() {
   const { isAuthenticated, user, logout } = useAuth()
   const navigate = useNavigate()
   const { tickers } = useBinancePrices()
+  const { balance } = useTrading()
+  const [avatarSrc] = useAvatar(user?.id ?? null)
 
   const navLinks = isAuthenticated ? [...PUBLIC_NAV, ...PRIVATE_NAV] : PUBLIC_NAV
 
@@ -206,7 +210,11 @@ export default function AppLayout() {
               <div className="app-header__balance-info">
                 <span>Balance</span>
                 <span className="app-header__balance-amount">
-                  1,530.45<span>USDT</span>
+                  {balance.toLocaleString('en-US', {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2,
+                  })}
+                  <span>USDT</span>
                 </span>
               </div>
               <Link to="/balance" className="app-header__deposit">
@@ -217,8 +225,18 @@ export default function AppLayout() {
                 className="app-header__avatar"
                 aria-label="Account"
                 title={user?.email || 'Account'}
+                style={
+                  avatarSrc
+                    ? {
+                        backgroundImage: `url(${avatarSrc})`,
+                        backgroundSize: 'cover',
+                        backgroundPosition: 'center',
+                        color: 'transparent',
+                      }
+                    : undefined
+                }
               >
-                {user?.name ? user.name[0].toUpperCase() : 'U'}
+                {avatarSrc ? '' : user?.name ? user.name[0].toUpperCase() : 'U'}
               </Link>
               <button
                 type="button"

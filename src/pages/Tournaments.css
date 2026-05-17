@@ -44,126 +44,193 @@
   background: var(--app-accent);
 }
 
-/* BULL vs BEAR banner */
+/* BULL vs BEAR banner — image speaks for itself, overlaid text kept minimal */
 .tournament-banner {
   position: relative;
   border: 1px solid var(--app-border);
   border-radius: 12px;
   overflow: hidden;
-  min-height: 380px;
+  min-height: 360px;
   isolation: isolate;
   box-shadow:
     inset 0 0 0 1px rgba(44, 246, 195, 0.05),
     0 12px 32px rgba(0, 0, 0, 0.5);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
 }
 
 .tournament-banner__bg {
   position: absolute;
   inset: 0;
-  background-image:
-    url('../assets/tournament1.png'),
-    radial-gradient(circle at 20% 50%, rgba(0, 255, 163, 0.4) 0%, transparent 50%),
-    radial-gradient(circle at 80% 50%, rgba(255, 59, 59, 0.5) 0%, transparent 50%),
-    radial-gradient(circle at 50% 100%, rgba(255, 87, 0, 0.3) 0%, transparent 60%),
+  background:
+    url('../assets/tournament1.png') center / cover no-repeat,
     linear-gradient(180deg, #0a0606 0%, #050707 60%, #000000 100%);
-  background-size: cover, auto, auto, auto, auto;
-  background-position: center, center, center, center, center;
-  background-repeat: no-repeat;
   z-index: 0;
 }
 
-.tournament-banner__content {
+/* Dark scrim so the bottom text is always legible */
+.tournament-banner__scrim {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background:
+    linear-gradient(180deg, rgba(5, 7, 10, 0.35) 0%, rgba(5, 7, 10, 0) 35%, rgba(5, 7, 10, 0) 55%, rgba(5, 7, 10, 0.92) 100%);
+  pointer-events: none;
+}
+
+.tournament-banner__top {
   position: relative;
   z-index: 1;
-  padding: 40px 36px 28px;
   display: flex;
-  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 24px 0;
+}
+
+.tournament-banner__chip {
+  display: inline-flex;
   align-items: center;
   gap: 8px;
-  height: 100%;
-}
-
-.tournament-banner__title {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  font: 900 72px/1 var(--app-font);
-  letter-spacing: -3.6px;
+  padding: 6px 12px;
+  border-radius: 9999px;
+  background: rgba(5, 7, 10, 0.7);
+  border: 1px solid rgba(0, 255, 163, 0.4);
+  font: 800 11px/1 var(--app-font);
+  letter-spacing: 0.8px;
   text-transform: uppercase;
-  margin-top: 80px;
+  color: var(--app-accent);
+  backdrop-filter: blur(6px);
 }
 
-.tournament-banner__title .bull {
-  background: linear-gradient(180deg, #fff 0%, #00cf84 50%, #009e65 100%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-  text-shadow: 0 0 4px #00452c, 0 0 78px #00ffa3;
-  filter: drop-shadow(0 0 20px rgba(0, 255, 163, 0.5));
+.tournament-banner__chip-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--app-accent);
+  box-shadow: 0 0 8px var(--app-accent);
+  animation: tournament-chip-pulse 1.6s ease-in-out infinite;
 }
 
-.tournament-banner__title .vs {
-  background: linear-gradient(180deg, #fef787 0%, #ec5b13 100%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-  text-shadow: 0 0 4px rgba(101, 0, 0, 0.78), 0 0 78px rgba(178, 0, 0, 0.56);
+@keyframes tournament-chip-pulse {
+  0%, 100% { opacity: 1;   transform: scale(1); }
+  50%      { opacity: 0.4; transform: scale(0.85); }
 }
 
-.tournament-banner__title .bear {
-  background: linear-gradient(180deg, #ffe87e 0%, #fea13e 50%, #fd551e 100%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-  text-shadow: 0 0 4px rgba(101, 0, 0, 0.78), 0 0 78px rgba(178, 0, 0, 0.56);
-  filter: drop-shadow(0 0 20px rgba(253, 85, 30, 0.4));
-}
-
-.tournament-banner__subtitle {
-  font: 900 22px/1 var(--app-font);
-  letter-spacing: 1px;
-  text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.7);
+.tournament-banner__participants {
+  font: 700 12px/1 var(--app-font);
+  color: rgba(255, 255, 255, 0.8);
+  background: rgba(5, 7, 10, 0.6);
+  padding: 6px 12px;
+  border-radius: 9999px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(6px);
 }
 
 .tournament-banner__bottom {
-  position: absolute;
-  left: 36px;
-  right: 36px;
-  bottom: 28px;
+  position: relative;
+  z-index: 1;
+  padding: 20px 28px 22px;
   display: flex;
   align-items: flex-end;
   justify-content: space-between;
   gap: 24px;
 }
 
-.tournament-banner__tagline {
+.tournament-banner__info {
+  max-width: 60%;
+}
+
+.tournament-banner__eyebrow {
+  font: 800 11px/1 var(--app-font);
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  color: var(--app-accent);
+  margin-bottom: 8px;
+}
+
+.tournament-banner__heading {
   margin: 0 0 6px;
-  font: 500 14px/1.4 var(--app-font);
-  color: #cbd5e1;
+  font: 900 32px/1 var(--app-font);
+  letter-spacing: -0.6px;
+  background: linear-gradient(90deg, #00ffa3 0%, #cdfff0 60%, #ffd9b8 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.tournament-banner__tagline {
+  margin: 0 0 12px;
+  font: 500 13px/1.4 var(--app-font);
+  color: rgba(255, 255, 255, 0.78);
 }
 
 .tournament-banner__prize {
-  font: 900 28px/1 var(--app-font);
+  display: inline-flex;
+  align-items: baseline;
+  gap: 10px;
+  padding: 10px 14px;
+  background: rgba(5, 7, 10, 0.7);
+  border: 1px solid rgba(0, 255, 163, 0.35);
+  border-radius: 10px;
+  backdrop-filter: blur(6px);
+}
+
+.tournament-banner__prize-label {
+  font: 700 10px/1 var(--app-font);
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  color: var(--app-text-muted);
+}
+
+.tournament-banner__prize-amount {
+  font: 900 22px/1 var(--app-font);
   color: var(--app-accent);
+  letter-spacing: -0.5px;
+}
+
+.tournament-banner__prize-amount span {
+  font: 700 12px/1 var(--app-font);
+  color: var(--app-text-muted);
+  margin-left: 2px;
 }
 
 .tournament-banner__cta {
   background: var(--app-accent);
   color: #05070a;
   border: 0;
-  border-radius: 12px;
-  padding: 16px 36px;
-  font: 900 16px/1 var(--app-font);
-  letter-spacing: 1.5px;
+  border-radius: 10px;
+  padding: 14px 30px;
+  font: 900 14px/1 var(--app-font);
+  letter-spacing: 1.4px;
   text-transform: uppercase;
   cursor: pointer;
-  filter: drop-shadow(0 0 8px rgba(0, 255, 163, 0.4));
-  transition: filter 0.15s ease, transform 0.05s ease;
+  box-shadow: 0 0 24px rgba(0, 255, 163, 0.4);
+  transition: filter 0.15s ease, transform 0.1s ease, box-shadow 0.2s ease;
+  flex-shrink: 0;
 }
 
 .tournament-banner__cta:hover {
-  filter: brightness(1.05) drop-shadow(0 0 12px rgba(0, 255, 163, 0.6));
+  filter: brightness(1.05);
+  transform: translateY(-1px);
+  box-shadow: 0 0 32px rgba(0, 255, 163, 0.6);
+}
+
+.tournament-banner__cta:active {
+  transform: translateY(0);
+}
+
+@media (max-width: 720px) {
+  .tournament-banner__bottom {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .tournament-banner__info {
+    max-width: 100%;
+  }
+  .tournament-banner__cta {
+    width: 100%;
+  }
 }
 
 /* Weekend Warriors grid */
@@ -298,9 +365,43 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 12px;
   background: var(--app-row-bg);
-  border-radius: 6px;
+  border: 1px solid transparent;
+  border-radius: 8px;
   padding: 10px 12px;
+  transition: border-color 0.15s ease, transform 0.15s ease;
+}
+
+.activity-item:hover {
+  border-color: rgba(0, 255, 163, 0.25);
+  transform: translateX(2px);
+}
+
+.activity-item__avatar {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #0b0f14;
+  font: 900 11px/1 var(--app-font);
+  flex-shrink: 0;
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.2);
+}
+
+/* Leaderboard avatar (Trader column) */
+.trader-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font: 900 12px/1 var(--app-font);
+  flex-shrink: 0;
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.2);
 }
 
 .tournament-card {

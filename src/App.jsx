@@ -3,6 +3,7 @@ import AppLayout from './components/AppLayout'
 import RequireAuth from './components/RequireAuth'
 import { AuthProvider } from './context/AuthContext'
 import { MarketProvider } from './context/MarketContext'
+import { TradingProvider } from './context/TradingContext'
 import Login from './pages/Login'
 import Register from './pages/Register'
 import Trading from './pages/Trading'
@@ -16,6 +17,7 @@ function App() {
   return (
     <AuthProvider>
       <MarketProvider>
+        <TradingProvider>
         <Routes>
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
@@ -36,6 +38,7 @@ function App() {
 
           <Route path="*" element={<Navigate to="/trading" replace />} />
         </Routes>
+        </TradingProvider>
       </MarketProvider>
     </AuthProvider>
   )

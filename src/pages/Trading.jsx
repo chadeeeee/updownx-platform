@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import CoinIcon from '../components/CoinIcon'
 import CoinPicker from '../components/CoinPicker'
@@ -6,53 +6,197 @@ import TradingViewChart from '../components/TradingViewChart'
 import { COINS } from '../data/coins'
 import { useAuth } from '../context/AuthContext'
 import { useMarket } from '../context/MarketContext'
-import useTrading, {
+import { ClockIcon } from '../components/icons'
+import {
+  useTrading,
   FEE_RATE,
   MAX_STAKE,
   MIN_STAKE,
   PAYOUT_MULT,
-} from '../hooks/useTrading'
+  PAYOUT_PROFIT_PCT,
+} from '../context/TradingContext'
 import '../components/AppLayout.css'
 import './Trading.css'
 
-const STAKE_PRESETS = [10, 50, 100, 250, 500]
-const DURATIONS = [
-  { value: 60, label: '1m' },
-  { value: 180, label: '3m' },
-  { value: 300, label: '5m' },
+const STAKE_PRESETS = [10, 50, 250, 500]
+
+// Quick-select buttons mirror the broker-style picker (S = seconds, M = minutes, H = hours).
+const DURATION_PRESETS = [
+  { value: 3, label: 'S3' },
+  { value: 15, label: 'S15' },
+  { value: 30, label: 'S30' },
+  { value: 60, label: 'M1' },
+  { value: 180, label: 'M3' },
+  { value: 300, label: 'M5' },
+  { value: 1800, label: 'M30' },
+  { value: 3600, label: 'H1' },
+  { value: 14400, label: 'H4' },
 ]
+
+const DURATION_MIN = 3
+const DURATION_MAX = 24 * 3600
+
 const TABS = ['Open positions', 'History']
 
+function pad2(n) {
+  return String(Math.max(0, Math.floor(n))).padStart(2, '0')
+}
+
+function splitHMS(totalSec) {
+  const t = Math.max(0, Math.floor(totalSec))
+  return {
+    h: Math.floor(t / 3600),
+    m: Math.floor((t % 3600) / 60),
+    s: t % 60,
+  }
+}
+
+function formatHMS(totalSec) {
+  const { h, m, s } = splitHMS(totalSec)
+  return `${pad2(h)}:${pad2(m)}:${pad2(s)}`
+}
+
 function formatCountdown(ms) {
-  const total = Math.max(0, Math.ceil(ms / 1000))
-  const m = Math.floor(total / 60)
-  const s = total % 60
-  return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`
+  return formatHMS(Math.max(0, Math.ceil(ms / 1000)))
+}
+
+function formatDurationShort(totalSec) {
+  if (totalSec < 60) return `${totalSec}s`
+  if (totalSec < 3600) return `${Math.round(totalSec / 60)}m`
+  return `${Math.round(totalSec / 3600)}h`
+}
+
+/* -------------------- Duration picker -------------------- */
+function DurationPicker({ value, onChange }) {
+  const [open, setOpen] = useState(false)
+  const ref = useRef(null)
+
+  useEffect(() => {
+    if (!open) return undefined
+    const onDoc = (e) => {
+      if (ref.current && !ref.current.contains(e.target)) setOpen(false)
+    }
+    document.addEventListener('mousedown', onDoc)
+    return () => document.removeEventListener('mousedown', onDoc)
+  }, [open])
+
+  const { h, m, s } = splitHMS(value)
+
+  const clamp = (v) => Math.min(DURATION_MAX, Math.max(DURATION_MIN, v))
+  const setHMS = (next) => onChange(clamp(next.h * 3600 + next.m * 60 + next.s))
+
+  const adjust = (unit, delta) => {
+    const next = { h, m, s }
+    if (unit === 'h') next.h = Math.min(23, Math.max(0, h + delta))
+    if (unit === 'm') next.m = Math.min(59, Math.max(0, m + delta))
+    if (unit === 's') next.s = Math.min(59, Math.max(0, s + delta))
+    setHMS(next)
+  }
+
+  return (
+    <div className="dp" ref={ref}>
+      <button
+        type="button"
+        className={`dp__field${open ? ' is-open' : ''}`}
+        onClick={() => setOpen((o) => !o)}
+        aria-expanded={open}
+      >
+        <span className="dp__value">{formatHMS(value)}</span>
+        <span className="dp__clock" aria-hidden>
+          <ClockIcon size={18} />
+        </span>
+      </button>
+
+      {open && (
+        <div className="dp__popover" role="dialog">
+          <div className="dp__steppers">
+            {['h', 'm', 's'].map((unit) => (
+              <div key={`up-${unit}`} className="dp__stepper">
+                <button
+                  type="button"
+                  className="dp__step-btn"
+                  onClick={() => adjust(unit, +1)}
+                  aria-label={`Increase ${unit}`}
+                >
+                  +
+                </button>
+              </div>
+            ))}
+            <div className="dp__digits">
+              <span>{pad2(h)}</span>
+              <span className="dp__colon">:</span>
+              <span>{pad2(m)}</span>
+              <span className="dp__colon">:</span>
+              <span>{pad2(s)}</span>
+            </div>
+            {['h', 'm', 's'].map((unit) => (
+              <div key={`down-${unit}`} className="dp__stepper">
+                <button
+                  type="button"
+                  className="dp__step-btn"
+                  onClick={() => adjust(unit, -1)}
+                  aria-label={`Decrease ${unit}`}
+                >
+                  −
+                </button>
+              </div>
+            ))}
+          </div>
+
+          <div className="dp__presets">
+            {DURATION_PRESETS.map((p) => (
+              <button
+                key={p.value}
+                type="button"
+                className={`dp__preset${value === p.value ? ' is-active' : ''}`}
+                onClick={() => onChange(p.value)}
+              >
+                {p.label}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
+/* -------------------- Position row -------------------- */
+const POSITION_COLS = '1.5fr 100px 110px 1fr 1fr 110px'
+
+function formatPrice(p) {
+  if (!Number.isFinite(p)) return '—'
+  const decimals = p >= 100 ? 2 : p >= 1 ? 4 : 6
+  return p.toLocaleString('en-US', {
+    minimumFractionDigits: decimals,
+    maximumFractionDigits: decimals,
+  })
 }
 
 function PositionRow({ position, now }) {
   const isOpen = position.status === 'open'
   const remainingMs = position.expiresAt - now
-  const elapsedRatio = isOpen
-    ? Math.min(
-        1,
-        Math.max(0, 1 - remainingMs / (position.durationSec * 1000)),
-      )
-    : 1
 
-  const payout =
-    position.status === 'won' ? position.amount * (PAYOUT_MULT - 1) : 0
   const profit =
     position.status === 'won'
-      ? +(position.amount * (PAYOUT_MULT - 1) - position.fee).toFixed(2)
+      ? +(position.amount * PAYOUT_PROFIT_PCT - position.fee).toFixed(2)
       : position.status === 'lost'
         ? -(position.amount + position.fee)
         : 0
 
+  const statusPill =
+    position.status === 'cancelled' ? (
+      <span className="trade-status trade-status--cancelled">CANCELLED</span>
+    ) : (
+      <span className={`pill pill--${position.dir}`}>
+        {position.dir === 'up' ? 'UP ↑' : 'DOWN ↓'}
+      </span>
+    )
+
   return (
     <div
       className="data-table__row"
-      style={{ gridTemplateColumns: '1.5fr 90px 90px 1fr 1fr 110px' }}
+      style={{ gridTemplateColumns: POSITION_COLS }}
     >
       <span style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
         <CoinIcon symbol={position.symbol} />
@@ -61,11 +205,21 @@ function PositionRow({ position, now }) {
           <span className="market-row__pair">/USDT</span>
         </span>
       </span>
-      <span className={`cell pill pill--${position.dir}`}>
-        {position.dir === 'up' ? 'UP ↑' : 'DOWN ↓'}
-      </span>
       <span className="cell--muted cell">
-        {isOpen ? formatCountdown(remainingMs) : `${position.durationSec / 60}m`}
+        {isOpen ? formatCountdown(remainingMs) : formatDurationShort(position.durationSec)}
+      </span>
+      <span
+        className="cell"
+        style={{ display: 'flex', flexDirection: 'column', gap: 2 }}
+      >
+        <span style={{ color: 'var(--app-text)', fontWeight: 700 }}>
+          {formatPrice(position.entryPrice)}
+        </span>
+        {!isOpen && Number.isFinite(position.closePrice) && (
+          <span className="cell--muted" style={{ fontSize: 11 }}>
+            → {formatPrice(position.closePrice)}
+          </span>
+        )}
       </span>
       <span className="cell">
         {position.amount.toFixed(2)} <span className="cell--muted">USDT</span>
@@ -85,41 +239,21 @@ function PositionRow({ position, now }) {
             ? 'refunded'
             : `${profit >= 0 ? '+' : ''}${profit.toFixed(2)} USDT`}
       </span>
-      <span style={{ textAlign: 'right' }}>
-        {isOpen ? (
-          <span className="trading-progress" aria-label="Time remaining">
-            <span
-              className="trading-progress__fill"
-              style={{ width: `${elapsedRatio * 100}%` }}
-            />
-          </span>
-        ) : (
-          <span
-            className={`trade-status trade-status--${position.status}`}
-            aria-label={position.status}
-          >
-            {position.status === 'won'
-              ? 'WON'
-              : position.status === 'lost'
-                ? 'LOST'
-                : 'CANCELLED'}
-          </span>
-        )}
-      </span>
+      <span style={{ textAlign: 'right' }}>{statusPill}</span>
     </div>
   )
 }
 
+/* -------------------- Trade panel -------------------- */
 function TradePanel({ activeSymbol }) {
   const { balance, openPosition } = useTrading()
 
-  const [amount, setAmount] = useState(50)
-  const [duration, setDuration] = useState(60)
+  const [amount, setAmount] = useState(10)
+  const [duration, setDuration] = useState(3)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState(null)
   const [success, setSuccess] = useState(null)
 
-  // Auto-clear inline messages so the panel stays clean.
   useEffect(() => {
     if (!error && !success) return undefined
     const id = setTimeout(() => {
@@ -130,8 +264,8 @@ function TradePanel({ activeSymbol }) {
   }, [error, success])
 
   const fee = +(amount * FEE_RATE).toFixed(4)
-  const projectedReturn = +(amount * PAYOUT_MULT).toFixed(2)
-  const profitOnWin = +(projectedReturn - amount - fee).toFixed(2)
+  const profitOnWin = +(amount * PAYOUT_PROFIT_PCT - fee).toFixed(2)
+  const payoutOnWin = +(amount * PAYOUT_MULT).toFixed(2)
 
   const stakeError =
     amount < MIN_STAKE
@@ -154,13 +288,15 @@ function TradePanel({ activeSymbol }) {
     setSuccess(null)
     setBusy(true)
     try {
-      await openPosition({
+      const pos = await openPosition({
         symbol: activeSymbol,
         dir,
         amount,
         durationSec: duration,
       })
-      setSuccess(`${dir === 'up' ? 'UP' : 'DOWN'} position opened.`)
+      setSuccess(
+        `${dir === 'up' ? 'UP' : 'DOWN'} opened @ ${formatPrice(pos.entryPrice)} USDT`,
+      )
     } catch (err) {
       setError(err?.message || 'Could not open position.')
     } finally {
@@ -171,6 +307,13 @@ function TradePanel({ activeSymbol }) {
   return (
     <section className="card trading-trade">
       <h3 className="card__title">Trade</h3>
+
+      <div>
+        <div className="trading-trade__row">
+          <span className="trading-trade__label">Time</span>
+        </div>
+        <DurationPicker value={duration} onChange={setDuration} />
+      </div>
 
       <div>
         <div className="trading-trade__row">
@@ -198,48 +341,20 @@ function TradePanel({ activeSymbol }) {
         />
       </div>
 
-      <div>
-        <div className="trading-trade__row">
-          <span className="trading-trade__label">Duration</span>
+      <div className="trading-trade__payout">
+        <div className="trading-trade__label" style={{ marginBottom: 4 }}>
+          Payout
         </div>
-        <div className="trading-trade__amounts">
-          {DURATIONS.map((d) => (
-            <button
-              key={d.value}
-              type="button"
-              className={`amount-btn${duration === d.value ? ' is-active' : ''}`}
-              onClick={() => setDuration(d.value)}
-            >
-              {d.label}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      <div className="trading-trade__row" style={{ justifyContent: 'space-between' }}>
-        <div>
-          <div className="trading-trade__label" style={{ marginBottom: 2 }}>
-            Payout
-          </div>
-          <div style={{ font: '700 13px/1 var(--app-font)', color: 'var(--app-text)' }}>
-            +50%
-          </div>
-        </div>
-        <div style={{ textAlign: 'center' }}>
-          <div className="trading-trade__label" style={{ marginBottom: 2 }}>
-            Fee
-          </div>
-          <div style={{ font: '600 12px/1 var(--app-font)', color: 'var(--app-text-muted)' }}>
-            ${fee.toFixed(4)}
-          </div>
-        </div>
-        <div style={{ textAlign: 'right' }}>
-          <div className="trading-trade__label" style={{ marginBottom: 2 }}>
-            Win Profit
-          </div>
-          <div style={{ font: '700 13px/1 var(--app-font)', color: 'var(--app-accent)' }}>
+        <div className="trading-trade__payout-row">
+          <span className="trading-trade__payout-pct">
+            +{Math.round(PAYOUT_PROFIT_PCT * 100)}%
+          </span>
+          <span className="trading-trade__payout-amount">
             +${profitOnWin.toFixed(2)}
-          </div>
+          </span>
+        </div>
+        <div className="trading-trade__payout-sub">
+          Win returns ${payoutOnWin.toFixed(2)} (stake + profit)
         </div>
       </div>
 
@@ -253,7 +368,7 @@ function TradePanel({ activeSymbol }) {
         onClick={() => handleOpen('up')}
         disabled={Boolean(stakeError) || busy}
       >
-        {busy ? 'Opening…' : 'Up'}
+        {busy ? 'Opening…' : 'Buy ↑'}
       </button>
       <button
         type="button"
@@ -261,7 +376,7 @@ function TradePanel({ activeSymbol }) {
         onClick={() => handleOpen('down')}
         disabled={Boolean(stakeError) || busy}
       >
-        {busy ? 'Opening…' : 'Down'}
+        {busy ? 'Opening…' : 'Sell ↓'}
       </button>
     </section>
   )
@@ -312,7 +427,6 @@ export default function Trading() {
   const [tab, setTab] = useState('Open positions')
   const [now, setNow] = useState(Date.now())
 
-  // Drives the live countdown rendered in PositionRow.
   useEffect(() => {
     if (openPositions.length === 0) return undefined
     const id = setInterval(() => setNow(Date.now()), 500)
@@ -329,7 +443,6 @@ export default function Trading() {
 
   return (
     <div className="trading-grid">
-      {/* LEFT COLUMN — chart + positions */}
       <div className="trading-main">
         <section className="content-card trading-chart-card">
           <div className="trading-chart-card__header">
@@ -360,11 +473,11 @@ export default function Trading() {
           <div className="data-table">
             <div
               className="data-table__head"
-              style={{ gridTemplateColumns: '1.5fr 90px 90px 1fr 1fr 110px' }}
+              style={{ gridTemplateColumns: POSITION_COLS }}
             >
               <span>Asset</span>
-              <span>Direction</span>
               <span>{tab === 'Open positions' ? 'Time left' : 'Duration'}</span>
+              <span>Entry price</span>
               <span>Investment</span>
               <span>Profit</span>
               <span style={{ textAlign: 'right' }}>Status</span>
@@ -374,7 +487,7 @@ export default function Trading() {
               <div className="data-table__empty">
                 {tab === 'Open positions'
                   ? isAuthenticated
-                    ? 'No open positions yet — pick an amount and a direction on the right.'
+                    ? 'No open positions yet — pick a time and amount on the right.'
                     : 'Sign in to open positions.'
                   : 'No closed trades yet.'}
               </div>
@@ -387,7 +500,6 @@ export default function Trading() {
         </section>
       </div>
 
-      {/* RIGHT COLUMN — trade panel + balance + tournament */}
       <div className="trading-side">
         {isAuthenticated ? (
           <>

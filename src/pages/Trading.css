@@ -48,6 +48,34 @@
 .trading-trade {
   gap: 16px;
   padding: 18px 20px;
+  animation: card-fade-in 0.35s ease both;
+}
+
+@keyframes card-fade-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.trading-balance-card,
+.trading-tournament,
+.trading-positions {
+  animation: card-fade-in 0.4s ease both;
+}
+
+.trading-balance-card { animation-delay: 0.05s; }
+.trading-tournament   { animation-delay: 0.1s; }
+
+.data-table__row {
+  animation: row-slide-in 0.35s ease both;
+}
+
+@keyframes row-slide-in {
+  from { opacity: 0; transform: translateX(-8px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+.data-table__row:hover {
+  background: rgba(0, 255, 163, 0.04);
 }
 
 .trading-trade__row {
@@ -67,6 +95,24 @@
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 8px;
+}
+
+.amount-btn {
+  transform: translateZ(0);
+}
+
+.amount-btn:active {
+  transform: scale(0.96);
+}
+
+.amount-btn.is-active {
+  animation: amount-pop 0.25s ease;
+}
+
+@keyframes amount-pop {
+  0% { transform: scale(1); }
+  45% { transform: scale(1.08); }
+  100% { transform: scale(1); }
 }
 
 .amount-btn {
@@ -107,6 +153,8 @@
 }
 
 .trade-cta {
+  position: relative;
+  overflow: hidden;
   width: 100%;
   border: 0;
   border-radius: 10px;
@@ -116,22 +164,63 @@
   text-transform: uppercase;
   cursor: pointer;
   color: #05070a;
-  transition: filter 0.15s ease, transform 0.05s ease;
+  transition: filter 0.15s ease, transform 0.08s ease, box-shadow 0.25s ease;
+}
+
+.trade-cta::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -75%;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.35),
+    transparent
+  );
+  transform: skewX(-20deg);
+  transition: left 0.6s ease;
+  pointer-events: none;
 }
 
 .trade-cta:hover {
-  filter: brightness(1.05);
+  filter: brightness(1.08);
+  transform: translateY(-1px);
+}
+
+.trade-cta:hover::after {
+  left: 120%;
+}
+
+.trade-cta:active {
+  transform: translateY(0) scale(0.99);
+}
+
+.trade-cta:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  filter: grayscale(0.4);
 }
 
 .trade-cta--up {
-  background: var(--app-accent);
+  background: linear-gradient(180deg, #00ffa3 0%, #00d488 100%);
   box-shadow: 0 0 30px rgba(0, 255, 163, 0.45);
 }
 
+.trade-cta--up:hover {
+  box-shadow: 0 0 42px rgba(0, 255, 163, 0.65);
+}
+
 .trade-cta--down {
-  background: var(--app-danger);
+  background: linear-gradient(180deg, #ff5252 0%, #d93030 100%);
   color: #fff;
   box-shadow: 0 0 30px rgba(255, 59, 59, 0.4);
+}
+
+.trade-cta--down:hover {
+  box-shadow: 0 0 42px rgba(255, 59, 59, 0.6);
 }
 
 .balance-btn {
@@ -430,4 +519,213 @@
   font: 800 10px/1 var(--app-font);
   letter-spacing: 0.6px;
   text-transform: uppercase;
+}
+
+/* -------------------- Duration picker -------------------- */
+.dp {
+  position: relative;
+}
+
+.dp__field {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  background: var(--app-row-bg);
+  border: 1px solid var(--app-border-soft);
+  border-radius: 8px;
+  padding: 12px 14px;
+  color: var(--app-text);
+  font: 800 16px/1 var(--app-font);
+  cursor: pointer;
+  outline: none;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.dp__field:hover,
+.dp__field.is-open {
+  border-color: var(--app-accent);
+  box-shadow: 0 0 0 2px rgba(0, 255, 163, 0.12);
+}
+
+.dp__clock {
+  color: var(--app-text-muted);
+  font-size: 14px;
+}
+
+.dp__popover {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  z-index: 10;
+  min-width: 280px;
+  background: var(--app-row-bg);
+  border: 1px solid var(--app-accent);
+  border-radius: 12px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(0, 255, 163, 0.15);
+  transform-origin: top right;
+  animation: dp-pop-in 0.18s cubic-bezier(0.22, 1.2, 0.36, 1);
+}
+
+@keyframes dp-pop-in {
+  from {
+    opacity: 0;
+    transform: translateY(-6px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.dp__field .dp__clock {
+  transition: transform 0.2s ease, color 0.15s ease;
+}
+
+.dp__field.is-open .dp__clock {
+  color: var(--app-accent);
+  transform: rotate(20deg);
+}
+
+.dp__steppers {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: auto auto auto;
+  gap: 6px;
+}
+
+.dp__stepper {
+  display: flex;
+  justify-content: center;
+}
+
+.dp__step-btn {
+  width: 100%;
+  background: var(--app-row-bg);
+  border: 1px solid var(--app-border-soft);
+  border-radius: 6px;
+  padding: 6px 0;
+  font: 700 14px/1 var(--app-font);
+  color: var(--app-text);
+  cursor: pointer;
+  transition: border-color 0.15s ease, color 0.15s ease;
+}
+
+.dp__step-btn:hover {
+  border-color: var(--app-accent);
+  color: var(--app-accent);
+}
+
+.dp__digits {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  font: 900 28px/1 var(--app-font);
+  color: var(--app-text);
+  letter-spacing: 2px;
+}
+
+.dp__colon {
+  color: var(--app-text-muted);
+}
+
+.dp__presets {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+}
+
+.dp__preset {
+  background: var(--app-row-bg);
+  border: 1px solid var(--app-border-soft);
+  border-radius: 8px;
+  padding: 10px 0;
+  font: 800 13px/1 var(--app-font);
+  color: var(--app-text);
+  cursor: pointer;
+  transition: border-color 0.15s ease, color 0.15s ease, background-color 0.15s ease;
+}
+
+.dp__preset:hover {
+  border-color: var(--app-text-muted);
+}
+
+.dp__preset.is-active {
+  border-color: var(--app-accent);
+  color: var(--app-accent);
+  background: rgba(0, 255, 163, 0.08);
+  box-shadow: 0 0 12px rgba(0, 255, 163, 0.25) inset;
+  animation: amount-pop 0.25s ease;
+}
+
+.dp__step-btn:active {
+  transform: scale(0.92);
+  transition: transform 0.05s ease;
+}
+
+.dp__digits span:not(.dp__colon) {
+  transition: color 0.2s ease, transform 0.2s ease;
+}
+
+/* -------------------- Payout summary -------------------- */
+.trading-trade__payout {
+  position: relative;
+  background:
+    radial-gradient(circle at 0% 0%, rgba(0, 255, 163, 0.12) 0%, transparent 65%),
+    var(--app-row-bg);
+  border: 1px dashed rgba(0, 255, 163, 0.4);
+  border-radius: 10px;
+  padding: 12px 14px;
+  overflow: hidden;
+}
+
+.trading-trade__payout::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: 10px;
+  pointer-events: none;
+  background: linear-gradient(120deg, transparent 40%, rgba(0, 255, 163, 0.15) 50%, transparent 60%);
+  background-size: 200% 100%;
+  animation: payout-shine 4s linear infinite;
+}
+
+@keyframes payout-shine {
+  from { background-position: 200% 0; }
+  to   { background-position: -100% 0; }
+}
+
+.trading-trade__payout-pct {
+  font: 900 22px/1 var(--app-font);
+  color: var(--app-accent);
+  text-shadow: 0 0 12px rgba(0, 255, 163, 0.45);
+}
+
+.trading-trade__payout-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.trading-trade__payout-pct {
+  font: 900 22px/1 var(--app-font);
+  color: var(--app-accent);
+}
+
+.trading-trade__payout-amount {
+  font: 800 14px/1 var(--app-font);
+  color: var(--app-accent);
+}
+
+.trading-trade__payout-sub {
+  margin-top: 6px;
+  font: 600 11px/1.4 var(--app-font);
+  color: var(--app-text-muted);
 }

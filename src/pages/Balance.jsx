@@ -1,79 +1,48 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Pagination } from './_shared'
+import { useAuth } from '../context/AuthContext'
+import { useTrading } from '../context/TradingContext'
 import '../components/AppLayout.css'
 import './Balance.css'
 
-const TX = [
-  {
-    type: 'Deposit',
-    dir: 'in',
-    asset: 'USDT',
-    network: 'TRC20',
-    amount: '500.00',
-    status: 'completed',
-    date: 'Oct 24, 2023',
-    hash: '0x4a...2e1c',
-  },
-  {
-    type: 'Deposit',
-    dir: 'in',
-    asset: 'USDT',
-    network: 'TRC20',
-    amount: '500.00',
-    status: 'completed',
-    date: 'Oct 24, 2023',
-    hash: '0x4a...2e1c',
-  },
-  {
-    type: 'Withdraw',
-    dir: 'out',
-    asset: 'USDT',
-    network: 'TRC20',
-    amount: '500.00',
-    status: 'failed',
-    date: 'Oct 24, 2023',
-    hash: '0x4a...2e1c',
-  },
-  {
-    type: 'Processing',
-    dir: 'out',
-    asset: 'USDT',
-    network: 'TRC20',
-    amount: '500.00',
-    status: 'pending',
-    date: 'Oct 24, 2023',
-    hash: '0x4a...2e1c',
-  },
-  {
-    type: 'Deposit',
-    dir: 'in',
-    asset: 'USDT',
-    network: 'TRC20',
-    amount: '500.00',
-    status: 'completed',
-    date: 'Oct 24, 2023',
-    hash: '0x4a...2e1c',
-  },
-  {
-    type: 'Deposit',
-    dir: 'in',
-    asset: 'USDT',
-    network: 'TRC20',
-    amount: '500.00',
-    status: 'completed',
-    date: 'Oct 24, 2023',
-    hash: '0x4a...2e1c',
-  },
+const DEMO_TX = [
+  { type: 'Deposit',    dir: 'in',  asset: 'USDT', network: 'TRC20', amount: '500.00', status: 'completed', date: 'Oct 24, 2023', hash: '0x4a...2e1c' },
+  { type: 'Deposit',    dir: 'in',  asset: 'USDT', network: 'TRC20', amount: '500.00', status: 'completed', date: 'Oct 24, 2023', hash: '0x4a...2e1c' },
+  { type: 'Withdraw',   dir: 'out', asset: 'USDT', network: 'TRC20', amount: '500.00', status: 'failed',    date: 'Oct 24, 2023', hash: '0x4a...2e1c' },
+  { type: 'Processing', dir: 'out', asset: 'USDT', network: 'TRC20', amount: '500.00', status: 'pending',   date: 'Oct 24, 2023', hash: '0x4a...2e1c' },
+  { type: 'Deposit',    dir: 'in',  asset: 'USDT', network: 'TRC20', amount: '500.00', status: 'completed', date: 'Oct 24, 2023', hash: '0x4a...2e1c' },
+  { type: 'Deposit',    dir: 'in',  asset: 'USDT', network: 'TRC20', amount: '500.00', status: 'completed', date: 'Oct 24, 2023', hash: '0x4a...2e1c' },
 ]
 
-const NETWORKS = [
-  { value: 'trc20', label: 'Tron (TRC20)' },
-  { value: 'erc20', label: 'Ethereum (ERC20)' },
-  { value: 'bep20', label: 'BNB Smart Chain (BEP20)' },
-  { value: 'sol', label: 'Solana (SPL)' },
-]
+const TX_HISTORY_KEY = (uid) => `updownx.tx.${uid ?? 'guest'}`
 
-const ADDRESS = 'TQ3h9f7v...2kL9sP1xZ'
+function readHistory(uid) {
+  try {
+    const raw = localStorage.getItem(TX_HISTORY_KEY(uid))
+    return raw ? JSON.parse(raw) : []
+  } catch {
+    return []
+  }
+}
+
+function writeHistory(uid, list) {
+  try {
+    localStorage.setItem(TX_HISTORY_KEY(uid), JSON.stringify(list))
+  } catch {
+    /* ignore */
+  }
+}
+
+function formatDate(ts) {
+  const d = new Date(ts)
+  return d.toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+  })
+}
+
+const QUICK_AMOUNTS = [50, 100, 250, 500, 1000]
 
 function PlusIcon() {
   return (
@@ -86,13 +55,7 @@ function PlusIcon() {
 function ArrowDownIcon() {
   return (
     <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-      <path
-        d="M8 3v10M4 9l4 4 4-4"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
+      <path d="M8 3v10M4 9l4 4 4-4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   )
 }
@@ -100,13 +63,7 @@ function ArrowDownIcon() {
 function ArrowInIcon() {
   return (
     <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-      <path
-        d="M3 13l10-10M13 9V3H7"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
+      <path d="M3 13l10-10M13 9V3H7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   )
 }
@@ -114,83 +71,214 @@ function ArrowInIcon() {
 function ArrowOutIcon() {
   return (
     <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-      <path
-        d="M13 3L3 13M3 7v6h6"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
+      <path d="M13 3L3 13M3 7v6h6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   )
 }
 
-function CopyIcon() {
-  return (
-    <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-      <rect x="5" y="5" width="9" height="9" rx="1.5" stroke="currentColor" strokeWidth="1.5" />
-      <path
-        d="M11 5V3.5A1.5 1.5 0 0 0 9.5 2h-6A1.5 1.5 0 0 0 2 3.5v6A1.5 1.5 0 0 0 3.5 11H5"
-        stroke="currentColor"
-        strokeWidth="1.5"
-      />
-    </svg>
-  )
-}
+/* -------------------- Deposit / Withdraw modal -------------------- */
+function AmountModal({ mode, balance, onClose, onSubmit }) {
+  const [amount, setAmount] = useState('')
+  const [busy, setBusy] = useState(false)
+  const [error, setError] = useState(null)
 
-function DownloadIcon() {
-  return (
-    <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-      <path
-        d="M8 2v9M4 7l4 4 4-4M3 13h10"
-        stroke="currentColor"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  )
-}
+  useEffect(() => {
+    const onKey = (e) => {
+      if (e.key === 'Escape') onClose()
+    }
+    document.addEventListener('keydown', onKey)
+    const prev = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    return () => {
+      document.removeEventListener('keydown', onKey)
+      document.body.style.overflow = prev
+    }
+  }, [onClose])
 
-function WarningIcon() {
+  const isDeposit = mode === 'deposit'
+  const title = isDeposit ? 'Deposit funds' : 'Withdraw funds'
+  const cta = isDeposit ? 'Confirm deposit' : 'Confirm withdrawal'
+
+  const handleSubmit = (e) => {
+    e.preventDefault()
+    setError(null)
+    const num = Number(amount)
+    if (!Number.isFinite(num) || num <= 0) {
+      setError('Enter a positive amount.')
+      return
+    }
+    if (!isDeposit && num > balance) {
+      setError('Insufficient balance.')
+      return
+    }
+    setBusy(true)
+    try {
+      onSubmit(num)
+      setBusy(false)
+      onClose()
+    } catch (err) {
+      setBusy(false)
+      setError(err?.message || 'Could not complete the transaction.')
+    }
+  }
+
   return (
-    <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-      <path
-        d="M8 6v3M8 11.5h.01M2.7 13h10.6c.8 0 1.3-.9.9-1.6L8.9 2.5a1 1 0 0 0-1.7 0L1.8 11.4c-.4.7.1 1.6.9 1.6Z"
-        stroke="currentColor"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
+    <div
+      className="account-modal__backdrop"
+      onClick={(e) => {
+        if (e.target === e.currentTarget) onClose()
+      }}
+      role="dialog"
+      aria-modal="true"
+      aria-label={title}
+    >
+      <div className="account-modal" style={{ maxWidth: 480 }}>
+        <button type="button" className="account-modal__close" onClick={onClose} aria-label="Close">
+          ×
+        </button>
+        <h2 className="account-modal__title">{title}</h2>
+        <p
+          style={{
+            margin: '4px 0 18px',
+            font: '500 13px/1.4 var(--app-font)',
+            color: 'var(--app-text-muted)',
+          }}
+        >
+          {isDeposit
+            ? 'Choose how much you want to top up your balance with.'
+            : 'Choose how much you want to withdraw from your balance.'}
+        </p>
+
+        <form className="amount-modal__form" onSubmit={handleSubmit}>
+          <label className="account-field" style={{ marginBottom: 14 }}>
+            <span className="account-field__label">Amount (USDT)</span>
+            <div className="amount-modal__input-wrap">
+              <span className="amount-modal__currency">$</span>
+              <input
+                type="text"
+                inputMode="decimal"
+                className="account-input amount-modal__input"
+                value={amount}
+                onChange={(e) =>
+                  setAmount(e.target.value.replace(/[^0-9.]/g, ''))
+                }
+                placeholder="0.00"
+                autoFocus
+              />
+            </div>
+          </label>
+
+          <div className="amount-modal__presets">
+            {QUICK_AMOUNTS.map((v) => (
+              <button
+                key={v}
+                type="button"
+                className={`amount-btn${Number(amount) === v ? ' is-active' : ''}`}
+                onClick={() => setAmount(String(v))}
+              >
+                {v}
+              </button>
+            ))}
+          </div>
+
+          <div className="amount-modal__summary">
+            <div>
+              <span>Available balance</span>
+              <b>
+                ${balance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+              </b>
+            </div>
+            <div>
+              <span>{isDeposit ? 'New balance' : 'Remaining balance'}</span>
+              <b className="cell--up">
+                $
+                {(isDeposit
+                  ? balance + (Number(amount) || 0)
+                  : balance - (Number(amount) || 0)
+                ).toLocaleString('en-US', {
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2,
+                })}
+              </b>
+            </div>
+          </div>
+
+          {error && (
+            <div className="account-form__error" style={{ marginTop: 12 }}>
+              {error}
+            </div>
+          )}
+
+          <button
+            type="submit"
+            className="account-form__save"
+            style={{ marginTop: 18, width: '100%', padding: 14 }}
+            disabled={busy}
+          >
+            {busy ? 'Processing…' : cta}
+          </button>
+        </form>
+      </div>
+    </div>
   )
 }
 
 export default function Balance() {
-  const [network, setNetwork] = useState('trc20')
+  const { user } = useAuth()
+  const { balance, deposit, withdraw } = useTrading()
   const [page, setPage] = useState(1)
-  const [copied, setCopied] = useState(false)
+  const [modal, setModal] = useState(null)
+  const [history, setHistory] = useState(() => readHistory(user?.id ?? null))
 
-  const handleCopy = async () => {
-    try {
-      await navigator.clipboard.writeText(ADDRESS)
-      setCopied(true)
-      setTimeout(() => setCopied(false), 1200)
-    } catch {
-      // ignore — older browsers without clipboard API
+  useEffect(() => {
+    setHistory(readHistory(user?.id ?? null))
+  }, [user?.id])
+
+  const handleDeposit = (amount) => {
+    deposit(amount)
+    const entry = {
+      id: `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+      type: 'Deposit',
+      dir: 'in',
+      asset: 'USDT',
+      network: 'TRC20',
+      amount: amount.toFixed(2),
+      status: 'completed',
+      date: formatDate(Date.now()),
+      hash: `0x${Math.random().toString(16).slice(2, 6)}...${Math.random().toString(16).slice(2, 6)}`,
     }
+    const next = [entry, ...history]
+    setHistory(next)
+    writeHistory(user?.id ?? null, next)
   }
 
-  const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?data=${encodeURIComponent(
-    ADDRESS,
-  )}&size=200x200&margin=0`
+  const handleWithdraw = (amount) => {
+    withdraw(amount)
+    const entry = {
+      id: `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+      type: 'Withdraw',
+      dir: 'out',
+      asset: 'USDT',
+      network: 'TRC20',
+      amount: amount.toFixed(2),
+      status: 'completed',
+      date: formatDate(Date.now()),
+      hash: `0x${Math.random().toString(16).slice(2, 6)}...${Math.random().toString(16).slice(2, 6)}`,
+    }
+    const next = [entry, ...history]
+    setHistory(next)
+    writeHistory(user?.id ?? null, next)
+  }
 
-  const PAGE_SIZE = 4
-  const visible = TX.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
+  const combined = [...history, ...DEMO_TX]
+  const PAGE_SIZE = 8
+  const visible = combined.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
+
+  // Quick stats derived from balance for plausibility.
+  const estimatedBtc = (balance / 64_500).toFixed(4)
 
   return (
     <div className="balance-page">
-      {/* -------------------- Header -------------------- */}
       <header className="balance-page__header">
         <div className="balance-page__header-text">
           <h1 className="page-title">Balance</h1>
@@ -199,31 +287,47 @@ export default function Balance() {
           </p>
         </div>
         <div className="balance-page__actions">
-          <button type="button" className="balance-action-btn balance-action-btn--primary">
+          <button
+            type="button"
+            className="balance-action-btn balance-action-btn--primary"
+            onClick={() => setModal('deposit')}
+          >
             <PlusIcon /> Deposit
           </button>
-          <button type="button" className="balance-action-btn">
+          <button
+            type="button"
+            className="balance-action-btn"
+            onClick={() => setModal('withdraw')}
+          >
             <ArrowDownIcon /> Withdraw
           </button>
         </div>
       </header>
 
-      {/* -------------------- Total Balance + Quick Stats -------------------- */}
       <div className="balance-page__top-grid">
         <section className="content-card balance-total">
           <div className="balance-total__bg-mark" aria-hidden="true" />
           <div className="balance-total__label">Total Balance</div>
           <div className="balance-total__amount">
-            12,450.80<span>USDT</span>
+            {balance.toLocaleString('en-US', {
+              minimumFractionDigits: 2,
+              maximumFractionDigits: 2,
+            })}
+            <span>USDT</span>
           </div>
           <div className="balance-total__row">
             <div>
               <div className="balance-total__row-label">Available</div>
-              <div className="balance-total__row-value">10,200.00</div>
+              <div className="balance-total__row-value">
+                {balance.toLocaleString('en-US', {
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2,
+                })}
+              </div>
             </div>
             <div>
               <div className="balance-total__row-label">Locked</div>
-              <div className="balance-total__row-value">2,250.80</div>
+              <div className="balance-total__row-value">0.00</div>
             </div>
             <div>
               <div className="balance-total__row-label">24h Change</div>
@@ -237,7 +341,7 @@ export default function Balance() {
           <div className="balance-stats__list">
             <div className="balance-stats__row">
               <span>Estimated BTC</span>
-              <b>0.1932 BTC</b>
+              <b>{estimatedBtc} BTC</b>
             </div>
             <div className="balance-stats__row">
               <span>Staking Yield</span>
@@ -254,93 +358,62 @@ export default function Balance() {
         </section>
       </div>
 
-      {/* -------------------- Deposit + Transactions -------------------- */}
-      <div className="balance-page__bottom-grid">
-        <section className="content-card balance-deposit">
-          <h3 className="balance-deposit__title">
-            <DownloadIcon /> Deposit USDT
-          </h3>
+      <section className="content-card balance-tx balance-tx--full">
+        <header className="balance-tx__header">
+          <h3 className="balance-tx__title">Recent Transactions</h3>
+          <a className="balance-tx__csv">Download CSV</a>
+        </header>
 
-          <div>
-            <div className="balance-deposit__network-label">Network Selector</div>
-            <div className="balance-deposit__network">
-              <select value={network} onChange={(e) => setNetwork(e.target.value)}>
-                {NETWORKS.map((n) => (
-                  <option key={n.value} value={n.value}>
-                    {n.label}
-                  </option>
-                ))}
-              </select>
+        <div className="balance-tx__list">
+          {visible.map((t, i) => (
+            <div key={t.id ?? `${i}-${t.hash}`} className="balance-tx__row">
+              <span
+                className={`balance-tx__type${
+                  t.dir === 'out' ? ' balance-tx__type--out' : ''
+                }`}
+              >
+                {t.dir === 'in' ? <ArrowInIcon /> : <ArrowOutIcon />} {t.type}
+              </span>
+              <span className="balance-tx__asset">
+                {t.asset}
+                <span>{t.network}</span>
+              </span>
+              <span className="balance-tx__amount">{t.amount}</span>
+              <span>
+                <span className={`balance-tx__status balance-tx__status--${t.status}`}>
+                  {t.status}
+                </span>
+              </span>
+              <span className="balance-tx__date">{t.date}</span>
+              <span className="balance-tx__hash">{t.hash}</span>
             </div>
-          </div>
+          ))}
+        </div>
 
-          <div className="balance-deposit__qr">
-            <img src={qrUrl} alt={`QR code for ${ADDRESS}`} />
-          </div>
+        <Pagination
+          total={combined.length}
+          page={page}
+          pageSize={PAGE_SIZE}
+          onPage={setPage}
+        />
+      </section>
 
-          <div className="balance-deposit__address">
-            <code>{ADDRESS}</code>
-            <button
-              type="button"
-              className="balance-deposit__copy"
-              onClick={handleCopy}
-              aria-label="Copy deposit address"
-            >
-              <CopyIcon />
-            </button>
-          </div>
-          {copied && (
-            <div style={{ font: '600 11px/1 var(--app-font)', color: 'var(--app-accent)' }}>
-              Address copied to clipboard.
-            </div>
-          )}
-
-          <div className="balance-deposit__warning">
-            <WarningIcon /> Send only <strong>USDT via TRC20</strong> to this address. Sending
-            any other coin or using another network may result in permanent loss.
-          </div>
-        </section>
-
-        <section className="content-card balance-tx">
-          <header className="balance-tx__header">
-            <h3 className="balance-tx__title">Recent Transactions</h3>
-            <a className="balance-tx__csv">Download CSV</a>
-          </header>
-
-          <div className="balance-tx__list">
-            {visible.map((t, i) => (
-              <div key={i} className="balance-tx__row">
-                <span
-                  className={`balance-tx__type${
-                    t.dir === 'out' ? ' balance-tx__type--out' : ''
-                  }`}
-                >
-                  {t.dir === 'in' ? <ArrowInIcon /> : <ArrowOutIcon />} {t.type}
-                </span>
-                <span className="balance-tx__asset">
-                  {t.asset}
-                  <span>{t.network}</span>
-                </span>
-                <span className="balance-tx__amount">{t.amount}</span>
-                <span>
-                  <span className={`balance-tx__status balance-tx__status--${t.status}`}>
-                    {t.status}
-                  </span>
-                </span>
-                <span className="balance-tx__date">{t.date}</span>
-                <span className="balance-tx__hash">{t.hash}</span>
-              </div>
-            ))}
-          </div>
-
-          <Pagination
-            total={TX.length * 4}
-            page={page}
-            pageSize={PAGE_SIZE}
-            onPage={setPage}
-          />
-        </section>
-      </div>
+      {modal === 'deposit' && (
+        <AmountModal
+          mode="deposit"
+          balance={balance}
+          onClose={() => setModal(null)}
+          onSubmit={handleDeposit}
+        />
+      )}
+      {modal === 'withdraw' && (
+        <AmountModal
+          mode="withdraw"
+          balance={balance}
+          onClose={() => setModal(null)}
+          onSubmit={handleWithdraw}
+        />
+      )}
     </div>
   )
 }

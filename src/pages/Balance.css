@@ -188,7 +188,75 @@
   color: var(--app-accent);
 }
 
-/* -------------------- Bottom grid: Deposit + Transactions -------------------- */
+/* Full-width transactions card replaces the old deposit-QR + tx grid */
+.balance-tx--full {
+  width: 100%;
+}
+
+/* -------------------- Amount (deposit/withdraw) modal -------------------- */
+.amount-modal__form {
+  display: flex;
+  flex-direction: column;
+}
+
+.amount-modal__input-wrap {
+  position: relative;
+}
+
+.amount-modal__currency {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  font: 800 16px/1 var(--app-font);
+  color: var(--app-text-muted);
+  pointer-events: none;
+}
+
+.amount-modal__input {
+  padding-left: 30px;
+  font: 900 22px/1 var(--app-font);
+  height: 56px;
+  text-align: left;
+}
+
+.amount-modal__presets {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.amount-modal__summary {
+  margin-top: 18px;
+  padding: 14px 16px;
+  background: var(--app-row-bg);
+  border: 1px solid var(--app-border-soft);
+  border-radius: 10px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.amount-modal__summary > div {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.amount-modal__summary span {
+  font: 700 10px/1 var(--app-font);
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: var(--app-text-muted);
+}
+
+.amount-modal__summary b {
+  font: 900 16px/1 var(--app-font);
+  color: var(--app-text);
+}
+
+/* -------------------- Bottom grid: Deposit + Transactions (legacy, unused) -------------------- */
 .balance-page__bottom-grid {
   display: grid;
   grid-template-columns: minmax(320px, 380px) 1fr;

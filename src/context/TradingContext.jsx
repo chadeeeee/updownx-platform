@@ -1,15 +1,12 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
-import { useAuth } from '../context/AuthContext'
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react'
+import { useAuth } from './AuthContext'
 
 // ─── Trading economics ──────────────────────────────────────────────
-// Open fee — 0.03% of stake — deducted from balance on UP/DOWN.
-export const FEE_RATE = 0.0003
-// Win pays back 1.5x stake (original + 50% profit).
-export const PAYOUT_MULT = 1.5
-// Trade size guardrails per the product brief.
-export const MIN_STAKE = 5
-export const MAX_STAKE = 2000
-// Demo starting balance assigned the first time a user opens the page.
+export const FEE_RATE = 0
+export const PAYOUT_PROFIT_PCT = 0.92
+export const PAYOUT_MULT = 1 + PAYOUT_PROFIT_PCT
+export const MIN_STAKE = 1
+export const MAX_STAKE = 20000
 export const STARTING_BALANCE = 1000
 
 const STORAGE_KEY = (userId) => `updownx.trading.${userId}`
@@ -48,16 +45,13 @@ function writeState(userId, state) {
   try {
     localStorage.setItem(STORAGE_KEY(userId), JSON.stringify(state))
   } catch {
-    // ignore — quota / privacy mode
+    /* ignore */
   }
 }
 
-/**
- * useTrading — owns the per-user trading state (balance + positions).
- * Stake/fee accounting, settlement on expiry, and persistence to
- * localStorage live here so individual pages stay declarative.
- */
-export default function useTrading() {
+const TradingContext = createContext(null)
+
+export function TradingProvider({ children }) {
   const { user } = useAuth()
   const userId = user?.id ?? null
 
@@ -82,8 +76,7 @@ export default function useTrading() {
     if (userId != null) writeState(userId, state)
   }, [userId, state])
 
-  // De-duplicate concurrent settlement attempts when the tick fires before
-  // the previous price fetch has finished resolving.
+  // De-duplicate concurrent settlement attempts.
   const settlingRef = useRef(new Set())
 
   // Settle expired positions every second.
@@ -125,7 +118,6 @@ export default function useTrading() {
             }
           })
         } catch {
-          // Network blip — refund stake + fee, mark cancelled.
           setState((prev) => {
             const positions = prev.positions.map((q) =>
               q.id === p.id
@@ -147,6 +139,36 @@ export default function useTrading() {
     const id = setInterval(tick, 1000)
     return () => clearInterval(id)
   }, [userId, state.positions])
+
+  const deposit = useCallback(
+    (amount) => {
+      if (userId == null) throw new Error('Sign in to make a deposit.')
+      const num = Number(amount)
+      if (!Number.isFinite(num) || num <= 0) throw new Error('Enter a positive amount.')
+      if (num > 1_000_000) throw new Error('Maximum deposit is $1,000,000.')
+      setState((prev) => ({
+        ...prev,
+        balance: +(prev.balance + num).toFixed(2),
+      }))
+      return num
+    },
+    [userId],
+  )
+
+  const withdraw = useCallback(
+    (amount) => {
+      if (userId == null) throw new Error('Sign in to withdraw.')
+      const num = Number(amount)
+      if (!Number.isFinite(num) || num <= 0) throw new Error('Enter a positive amount.')
+      if (num > state.balance) throw new Error('Insufficient balance.')
+      setState((prev) => ({
+        ...prev,
+        balance: +(prev.balance - num).toFixed(2),
+      }))
+      return num
+    },
+    [userId, state.balance],
+  )
 
   const openPosition = useCallback(
     async ({ symbol, dir, amount, durationSec }) => {
@@ -191,14 +213,27 @@ export default function useTrading() {
     [userId, state.balance],
   )
 
-  const openPositions = state.positions.filter((p) => p.status === 'open')
-  const closedPositions = state.positions.filter((p) => p.status !== 'open')
+  const value = useMemo(() => {
+    const openPositions = state.positions.filter((p) => p.status === 'open')
+    const closedPositions = state.positions.filter((p) => p.status !== 'open')
+    return {
+      balance: state.balance,
+      positions: state.positions,
+      openPositions,
+      closedPositions,
+      openPosition,
+      deposit,
+      withdraw,
+    }
+  }, [state, openPosition, deposit, withdraw])
 
-  return {
-    balance: state.balance,
-    positions: state.positions,
-    openPositions,
-    closedPositions,
-    openPosition,
-  }
+  return <TradingContext.Provider value={value}>{children}</TradingContext.Provider>
 }
+
+export function useTrading() {
+  const ctx = useContext(TradingContext)
+  if (!ctx) throw new Error('useTrading must be used inside <TradingProvider>')
+  return ctx
+}
+
+export default useTrading
