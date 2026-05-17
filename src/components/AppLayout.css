@@ -31,6 +31,7 @@
   color: var(--app-text);
   font-family: var(--app-font);
   overflow-x: hidden;
+  width: 100%;
 }
 
 /* Green corner glows */
@@ -261,11 +262,7 @@
   gap: 16px;
   position: sticky;
   top: 24px;
-  align-self: stretch;
-}
-
-.app-sidebar .card:last-child {
-  flex: 1;
+  align-self: start;
 }
 
 .card {
@@ -1479,5 +1476,94 @@
   }
   .account-form__grid {
     grid-template-columns: 1fr;
+  }
+}
+
+/* ==================== Mobile bottom nav (hidden on desktop) ==================== */
+.mob-bottom-nav {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  /* ---- Header mobile ---- */
+  .app-header {
+    grid-template-columns: 1fr auto;
+    padding: 8px 12px;
+    gap: 8px;
+  }
+
+  .app-header__nav { display: none; }
+
+  .app-header__right {
+    grid-column: auto;
+  }
+
+  .app-header__balance-info { display: none; }
+  .app-header__logout { display: none; }
+  .app-header__avatar { display: none; }
+
+  .app-header__logo img {
+    height: 24px;
+  }
+
+  .app-header__deposit {
+    padding: 8px 14px;
+    font-size: 11px;
+  }
+
+  /* ---- Body mobile ---- */
+  .app-body {
+    display: flex;
+    flex-direction: column;
+    padding: 12px;
+    padding-bottom: 80px; /* space for bottom nav */
+    width: 100%;
+  }
+
+  .app-content {
+    width: 100%;
+  }
+
+  .app-sidebar { display: none; }
+
+  /* ---- Bottom nav ---- */
+  .mob-bottom-nav {
+    display: flex;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 100;
+    background: var(--app-bg);
+    border-top: 1px solid var(--app-border-soft);
+    padding: 6px 0;
+    padding-bottom: max(6px, env(safe-area-inset-bottom));
+    justify-content: space-around;
+  }
+
+  .mob-bottom-nav__item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    padding: 4px 8px;
+    font: 600 10px/1 var(--app-font);
+    color: var(--app-text-muted);
+    text-decoration: none;
+    transition: color 0.15s ease;
+    min-width: 0;
+  }
+
+  .mob-bottom-nav__item.is-active {
+    color: var(--app-accent);
+  }
+
+  .mob-bottom-nav__item svg {
+    flex-shrink: 0;
+  }
+
+  /* content card padding on mobile */
+  .content-card {
+    padding: 16px;
   }
 }

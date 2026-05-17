@@ -61,6 +61,16 @@ function ArrowDownIcon() {
 }
 
 function ArrowInIcon() {
+  // Down-left arrow: funds coming IN
+  return (
+    <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+      <path d="M13 3L3 13M3 7v6h6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  )
+}
+
+function ArrowOutIcon() {
+  // Up-right arrow: funds going OUT
   return (
     <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
       <path d="M3 13l10-10M13 9V3H7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
@@ -68,12 +78,57 @@ function ArrowInIcon() {
   )
 }
 
-function ArrowOutIcon() {
+function ProcessingIcon() {
   return (
     <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-      <path d="M13 3L3 13M3 7v6h6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+      <path
+        d="M2 8a6 6 0 0 1 10.5-4M14 8a6 6 0 0 1-10.5 4M12 2v3h-3M4 14v-3h3"
+        stroke="currentColor"
+        strokeWidth="1.6"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
     </svg>
   )
+}
+
+function DownloadIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+      <path
+        d="M8 2v9m-4-4 4 4 4-4M3 13h10"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  )
+}
+
+function CopyIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+      <rect x="5" y="5" width="9" height="9" rx="1.5" stroke="currentColor" strokeWidth="1.5" />
+      <path d="M11 5V3.5A1.5 1.5 0 0 0 9.5 2h-6A1.5 1.5 0 0 0 2 3.5v6A1.5 1.5 0 0 0 3.5 11H5" stroke="currentColor" strokeWidth="1.5" />
+    </svg>
+  )
+}
+
+function WarningIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+      <path d="M8 2 1.5 13.5h13L8 2Z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" />
+      <path d="M8 6.5v3.2M8 11.5v.5" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" />
+    </svg>
+  )
+}
+
+const DEPOSIT_ADDRESS = 'TQ3h9f7v2kL9sP1xZ4mN8rW7uV1bX'
+
+function shortenAddress(addr) {
+  if (!addr) return ''
+  return `${addr.slice(0, 8)}...${addr.slice(-7)}`
 }
 
 /* -------------------- Deposit / Withdraw modal -------------------- */
@@ -271,14 +326,50 @@ export default function Balance() {
   }
 
   const combined = [...history, ...DEMO_TX]
-  const PAGE_SIZE = 8
+  const PAGE_SIZE = 4
   const visible = combined.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
+
+  const [network, setNetwork] = useState('Tron (TRC20)')
+  const [copied, setCopied] = useState(false)
+  const [mobileTab, setMobileTab] = useState('balance')
+
+  const MOBILE_TABS = [
+    { id: 'balance', label: 'Balance' },
+    { id: 'deposit', label: 'Deposit' },
+    { id: 'markets', label: 'Markets' },
+    { id: 'traders', label: 'Traders' },
+  ]
+
+  const handleCopy = () => {
+    try {
+      navigator.clipboard?.writeText(DEPOSIT_ADDRESS)
+      setCopied(true)
+      window.setTimeout(() => setCopied(false), 1500)
+    } catch {
+      /* ignore */
+    }
+  }
 
   // Quick stats derived from balance for plausibility.
   const estimatedBtc = (balance / 64_500).toFixed(4)
 
   return (
-    <div className="balance-page">
+    <div className={`balance-page balance-page--tab-${mobileTab}`}>
+      <nav className="balance-mobile-tabs" role="tablist">
+        {MOBILE_TABS.map((t) => (
+          <button
+            key={t.id}
+            type="button"
+            role="tab"
+            aria-selected={mobileTab === t.id}
+            className={`balance-mobile-tab${mobileTab === t.id ? ' is-active' : ''}`}
+            onClick={() => setMobileTab(t.id)}
+          >
+            {t.label}
+          </button>
+        ))}
+      </nav>
+
       <header className="balance-page__header">
         <div className="balance-page__header-text">
           <h1 className="page-title">Balance</h1>
@@ -305,7 +396,7 @@ export default function Balance() {
       </header>
 
       <div className="balance-page__top-grid">
-        <section className="content-card balance-total">
+        <section className="content-card balance-total balance-mobile-pane balance-mobile-pane--balance">
           <div className="balance-total__bg-mark" aria-hidden="true" />
           <div className="balance-total__label">Total Balance</div>
           <div className="balance-total__amount">
@@ -334,9 +425,26 @@ export default function Balance() {
               <div className="balance-total__row-value cell--up">+5.24%</div>
             </div>
           </div>
+
+          <div className="balance-total__mobile-actions">
+            <button
+              type="button"
+              className="balance-action-btn balance-action-btn--primary"
+              onClick={() => setModal('deposit')}
+            >
+              <PlusIcon /> Deposit
+            </button>
+            <button
+              type="button"
+              className="balance-action-btn"
+              onClick={() => setModal('withdraw')}
+            >
+              <ArrowDownIcon /> Withdraw
+            </button>
+          </div>
         </section>
 
-        <section className="content-card balance-stats">
+        <section className="content-card balance-stats balance-mobile-pane balance-mobile-pane--balance">
           <h3 className="card__title">Quick Stats</h3>
           <div className="balance-stats__list">
             <div className="balance-stats__row">
@@ -358,44 +466,119 @@ export default function Balance() {
         </section>
       </div>
 
-      <section className="content-card balance-tx balance-tx--full">
-        <header className="balance-tx__header">
-          <h3 className="balance-tx__title">Recent Transactions</h3>
-          <a className="balance-tx__csv">Download CSV</a>
-        </header>
+      <div className="balance-page__bottom-grid">
+        <section className="content-card balance-deposit balance-mobile-pane balance-mobile-pane--deposit">
+          <h3 className="balance-deposit__title">
+            <DownloadIcon /> Deposit USDT
+          </h3>
 
-        <div className="balance-tx__list">
-          {visible.map((t, i) => (
-            <div key={t.id ?? `${i}-${t.hash}`} className="balance-tx__row">
-              <span
-                className={`balance-tx__type${
-                  t.dir === 'out' ? ' balance-tx__type--out' : ''
-                }`}
-              >
-                {t.dir === 'in' ? <ArrowInIcon /> : <ArrowOutIcon />} {t.type}
-              </span>
-              <span className="balance-tx__asset">
-                {t.asset}
-                <span>{t.network}</span>
-              </span>
-              <span className="balance-tx__amount">{t.amount}</span>
-              <span>
-                <span className={`balance-tx__status balance-tx__status--${t.status}`}>
-                  {t.status}
-                </span>
-              </span>
-              <span className="balance-tx__date">{t.date}</span>
-              <span className="balance-tx__hash">{t.hash}</span>
+          <div>
+            <div className="balance-deposit__network-label">Network Selector</div>
+            <div className="balance-deposit__network">
+              <select value={network} onChange={(e) => setNetwork(e.target.value)}>
+                <option>Tron (TRC20)</option>
+                <option>Ethereum (ERC20)</option>
+                <option>BNB Smart Chain (BEP20)</option>
+                <option>Polygon</option>
+              </select>
             </div>
-          ))}
-        </div>
+          </div>
 
-        <Pagination
-          total={combined.length}
-          page={page}
-          pageSize={PAGE_SIZE}
-          onPage={setPage}
-        />
+          <div className="balance-deposit__qr">
+            <img
+              src={`https://api.qrserver.com/v1/create-qr-code/?size=240x240&margin=0&data=${encodeURIComponent(DEPOSIT_ADDRESS)}`}
+              alt="Deposit address QR code"
+            />
+          </div>
+
+          <div className="balance-deposit__address">
+            <code>{shortenAddress(DEPOSIT_ADDRESS)}</code>
+            <button
+              type="button"
+              className="balance-deposit__copy"
+              onClick={handleCopy}
+              aria-label="Copy address"
+            >
+              <CopyIcon />
+            </button>
+          </div>
+
+          <div className="balance-deposit__warning">
+            <span style={{ display: 'inline-flex', alignItems: 'flex-start', gap: 8 }}>
+              <WarningIcon />
+              <span>
+                {copied ? (
+                  <strong>Address copied to clipboard.</strong>
+                ) : (
+                  <>
+                    Send only <strong>USDT</strong> via <strong>TRC20</strong> to this
+                    address. Sending any other coin or using another network may result
+                    in permanent loss.
+                  </>
+                )}
+              </span>
+            </span>
+          </div>
+        </section>
+
+        <section className="content-card balance-tx balance-mobile-pane balance-mobile-pane--balance">
+          <header className="balance-tx__header">
+            <h3 className="balance-tx__title">Recent Transactions</h3>
+            <a className="balance-tx__csv">Download CSV</a>
+          </header>
+
+          <div className="balance-tx__list">
+            {visible.map((t, i) => {
+              const Icon =
+                t.type === 'Processing'
+                  ? ProcessingIcon
+                  : t.dir === 'in'
+                    ? ArrowInIcon
+                    : ArrowOutIcon
+              return (
+                <div key={t.id ?? `${i}-${t.hash}`} className="balance-tx__row">
+                  <span
+                    className={`balance-tx__type balance-tx__type--${
+                      t.type === 'Processing'
+                        ? 'processing'
+                        : t.dir === 'in'
+                          ? 'in'
+                          : 'out'
+                    }`}
+                  >
+                    <Icon /> {t.type}
+                  </span>
+                  <span className="balance-tx__asset">
+                    {t.asset}
+                    <span>{t.network}</span>
+                  </span>
+                  <span className="balance-tx__amount">{t.amount}</span>
+                  <span>
+                    <span className={`balance-tx__status balance-tx__status--${t.status}`}>
+                      {t.status}
+                    </span>
+                  </span>
+                  <span className="balance-tx__date">{t.date}</span>
+                  <span className="balance-tx__hash">{t.hash}</span>
+                </div>
+              )
+            })}
+          </div>
+
+          <Pagination
+            total={combined.length}
+            page={page}
+            pageSize={PAGE_SIZE}
+            onPage={setPage}
+          />
+        </section>
+      </div>
+
+      <section className="content-card balance-empty-pane balance-mobile-pane balance-mobile-pane--markets">
+        <p>Markets — coming soon.</p>
+      </section>
+      <section className="content-card balance-empty-pane balance-mobile-pane balance-mobile-pane--traders">
+        <p>Traders — coming soon.</p>
       </section>
 
       {modal === 'deposit' && (

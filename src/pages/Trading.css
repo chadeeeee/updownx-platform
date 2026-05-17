@@ -4,7 +4,7 @@
   display: grid;
   grid-template-columns: 1fr 320px;
   gap: 16px;
-  align-items: start;
+  align-items: stretch;
 }
 
 .trading-main {
@@ -300,6 +300,7 @@
 
 /* -------------------- BULL VS BEAR (sidebar tournament card) -------------------- */
 .trading-tournament {
+  flex: 1;
   background:
     radial-gradient(circle at 0% 0%, rgba(0, 255, 163, 0.18) 0%, transparent 60%),
     radial-gradient(circle at 100% 100%, rgba(0, 255, 163, 0.08) 0%, transparent 60%),
@@ -774,4 +775,195 @@
   margin-top: 6px;
   font: 600 11px/1.4 var(--app-font);
   color: var(--app-text-muted);
+}
+
+/* ==================== Mobile tabs (hidden on desktop) ==================== */
+.mob-tabs { display: none; }
+.mob-trade-panel { display: none; }
+.mob-positions { display: none; }
+.mob-traders-wrap { display: none; }
+
+/* ==================== Traders panel ==================== */
+.mob-traders {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.mob-traders__section {
+  gap: 8px;
+}
+
+.mob-traders__list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.mob-traders__row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 8px;
+  border-radius: 8px;
+  transition: background 0.15s ease;
+}
+
+.mob-traders__row:hover {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.mob-traders__name {
+  flex: 1;
+  font: 600 13px/1 var(--app-font);
+  color: var(--app-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.mob-traders__amount {
+  font: 800 13px/1 var(--app-font);
+  flex-shrink: 0;
+}
+
+.mob-traders__amount.is-up { color: var(--app-accent); }
+.mob-traders__amount.is-down { color: #ff5252; }
+
+.mob-traders__rank {
+  font: 800 13px/1 var(--app-font);
+  color: var(--app-text-muted);
+  min-width: 22px;
+}
+
+.mob-traders__meta {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.mob-traders__top-name {
+  font: 800 14px/1 var(--app-font);
+  color: var(--app-text);
+}
+
+.mob-traders__top-sub {
+  font: 600 11px/1 var(--app-font);
+  color: var(--app-text-muted);
+}
+
+/* ==================== MOBILE (max-width: 768px) ==================== */
+@media (max-width: 768px) {
+  .mob-tabs {
+    display: flex;
+    gap: 0;
+    background: var(--app-card-bg);
+    border: 1px solid var(--app-border);
+    border-radius: 12px;
+    padding: 4px;
+    grid-column: 1 / -1;
+  }
+
+  .mob-tabs__btn {
+    flex: 1;
+    background: transparent;
+    border: 0;
+    padding: 10px 6px;
+    font: 600 13px/1 var(--app-font);
+    color: var(--app-text-muted);
+    cursor: pointer;
+    border-radius: 8px;
+    transition: color 0.15s ease, background 0.15s ease;
+  }
+
+  .mob-tabs__btn.is-active {
+    color: var(--app-accent);
+    background: rgba(0, 255, 163, 0.08);
+  }
+
+  .trading-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    width: 100%;
+  }
+
+  /* Hide desktop-only elements */
+  .desk-only { display: none !important; }
+
+  /* Show mobile elements */
+  .mob-trade-panel,
+  .mob-positions,
+  .mob-traders-wrap {
+    display: block;
+  }
+
+  .mob-hide { display: none !important; }
+
+  .trading-main {
+    gap: 12px;
+  }
+
+  /* Chart card mobile */
+  .trading-chart-card {
+    padding: 8px;
+    gap: 8px;
+  }
+
+  .trading-chart-card__header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .trading-chart-card__intervals {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    gap: 2px;
+  }
+
+  .trading-chart-card__picker .coin-picker {
+    width: auto;
+  }
+
+  .content-card {
+    padding: 12px;
+  }
+
+  /* Chart height override for mobile */
+  .tv-chart-wrapper {
+    height: 280px !important;
+  }
+
+  /* Trade panel mobile */
+  .trading-trade {
+    padding: 14px;
+    gap: 14px;
+  }
+
+  .trade-cta {
+    padding: 16px 0;
+    font-size: 20px;
+  }
+
+  /* Positions mobile */
+  .trading-positions {
+    padding: 12px;
+  }
+
+  .data-table__head,
+  .data-table__row {
+    font-size: 11px;
+  }
+
+  /* Reduce positions card gap */
+  .mob-positions .trading-positions {
+    gap: 8px;
+  }
+
+  .mob-pos-row {
+    padding: 8px 4px;
+  }
 }

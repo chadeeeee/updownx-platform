@@ -3,7 +3,9 @@ import { Link } from 'react-router-dom'
 import CoinIcon from '../components/CoinIcon'
 import CoinPicker from '../components/CoinPicker'
 import TradingViewChart from '../components/TradingViewChart'
-import { COINS } from '../data/coins'
+import UserAvatar from '../components/UserAvatar'
+import { COINS, TRADE_COINS } from '../data/coins'
+import { randomTraderName } from '../data/liveTraders'
 import { useAuth } from '../context/AuthContext'
 import { useMarket } from '../context/MarketContext'
 import { ClockIcon } from '../components/icons'
@@ -18,11 +20,8 @@ import {
 import '../components/AppLayout.css'
 import './Trading.css'
 
-<<<<<<< HEAD
 const STAKE_PRESETS = [10, 50, 250, 500]
-=======
-const AMOUNTS = [10, 50, 100, 250]
-const TABS = ['Open positions', 'History', 'Orders']
+
 const INTERVALS = [
   { label: '1m', value: '1' },
   { label: '5m', value: '5' },
@@ -32,7 +31,6 @@ const INTERVALS = [
   { label: '4h', value: '240' },
   { label: '1D', value: 'D' },
 ]
->>>>>>> f2080c6932ae2cf7cf18700224531092c8146a30
 
 // Quick-select buttons mirror the broker-style picker (S = seconds, M = minutes, H = hours).
 const DURATION_PRESETS = [
@@ -47,11 +45,33 @@ const DURATION_PRESETS = [
   { value: 14400, label: 'H4' },
 ]
 
-<<<<<<< HEAD
 const DURATION_MIN = 3
 const DURATION_MAX = 24 * 3600
 
 const TABS = ['Open positions', 'History']
+const MOBILE_TABS = ['Trade', 'Markets', 'Positions', 'Traders']
+
+const MOBILE_POS_COLS = '1.2fr 0.7fr 0.9fr 1fr 80px'
+
+const TOP_TRADERS = [
+  { rank: 1, name: 'NovaX', perf: '+$140.50' },
+  { rank: 2, name: 'BitLrd', perf: '+$140.50' },
+  { rank: 3, name: 'ZenMaster', perf: '+$140.50' },
+]
+
+function generateMobileTrade() {
+  const coin = TRADE_COINS[Math.floor(Math.random() * TRADE_COINS.length)]
+  const isWin = Math.random() > 0.4
+  const stake = Math.round((5 + Math.random() * 495) * 100) / 100
+  const amount = isWin ? stake * 0.5 : -stake
+  return {
+    id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+    name: randomTraderName(),
+    symbol: coin.symbol,
+    amount,
+    isWin,
+  }
+}
 
 function pad2(n) {
   return String(Math.max(0, Math.floor(n))).padStart(2, '0')
@@ -434,25 +454,111 @@ function BalanceCard({ balance }) {
   )
 }
 
+/* -------------------- Mobile position row (compact) -------------------- */
+function MobilePositionRow({ position, now }) {
+  const isOpen = position.status === 'open'
+  const remainingMs = position.expiresAt - now
+
+  const profit =
+    position.status === 'won'
+      ? +(position.amount * PAYOUT_PROFIT_PCT - position.fee).toFixed(2)
+      : position.status === 'lost'
+        ? -(position.amount + position.fee)
+        : 0
+
+  const profitStr = isOpen
+    ? '—'
+    : position.status === 'cancelled'
+      ? 'refunded'
+      : `${profit >= 0 ? '+' : ''}${profit.toFixed(0)} USDT`
+
+  const statusPill =
+    position.status === 'cancelled' ? (
+      <span className="trade-status trade-status--cancelled">CANCEL</span>
+    ) : (
+      <span className={`pill pill--${position.dir}`}>
+        {position.dir === 'up' ? 'UP ↑' : 'DOWN ↓'}
+      </span>
+    )
+
+  return (
+    <div className="data-table__row mob-pos-row" style={{ gridTemplateColumns: MOBILE_POS_COLS }}>
+      <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+        <CoinIcon symbol={position.symbol} size={22} />
+        <span className="cell">
+          <span className="market-row__symbol">{position.symbol}</span>
+          <span className="market-row__pair">/USDT</span>
+        </span>
+      </span>
+      <span className="cell--muted cell">
+        {isOpen ? formatCountdown(remainingMs) : formatDurationShort(position.durationSec)}
+      </span>
+      <span className="cell">{position.amount.toFixed(0)} USDT</span>
+      <span className={`cell ${position.status === 'won' ? 'cell--up' : position.status === 'lost' ? 'cell--down' : 'cell--muted'}`}>
+        {profitStr}
+      </span>
+      <span style={{ textAlign: 'right' }}>{statusPill}</span>
+    </div>
+  )
+}
+
+/* -------------------- Traders panel (mobile) -------------------- */
+function TradersPanel() {
+  const [trades, setTrades] = useState(() =>
+    Array.from({ length: 5 }, () => generateMobileTrade()),
+  )
+
+  useEffect(() => {
+    const id = setInterval(() => {
+      setTrades((prev) => [generateMobileTrade(), ...prev].slice(0, 5))
+    }, 2500)
+    return () => clearInterval(id)
+  }, [])
+
+  return (
+    <div className="mob-traders">
+      <section className="card mob-traders__section">
+        <h3 className="card__title">Live Trades</h3>
+        <div className="mob-traders__list">
+          {trades.map((t) => (
+            <div key={t.id} className="mob-traders__row">
+              <UserAvatar name={t.name} size={30} />
+              <span className="mob-traders__name">{t.name}</span>
+              <span className={`mob-traders__amount ${t.isWin ? 'is-up' : 'is-down'}`}>
+                {t.isWin ? '+' : ''}{t.amount.toFixed(2)}
+              </span>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section className="card mob-traders__section">
+        <h3 className="card__title">Top Traders</h3>
+        <div className="mob-traders__list">
+          {TOP_TRADERS.map((tr) => (
+            <div key={tr.rank} className="mob-traders__row mob-traders__row--top">
+              <span className="mob-traders__rank">#{tr.rank}</span>
+              <UserAvatar name={tr.name} size={36} />
+              <span className="mob-traders__meta">
+                <span className="mob-traders__top-name">{tr.name}</span>
+                <span className="mob-traders__top-sub">24h Performance</span>
+              </span>
+              <span className="mob-traders__amount is-up">{tr.perf}</span>
+            </div>
+          ))}
+        </div>
+      </section>
+    </div>
+  )
+}
+
 export default function Trading() {
   const { isAuthenticated } = useAuth()
   const { symbol: activeSymbol, setSymbol } = useMarket()
   const { balance, openPositions, closedPositions } = useTrading()
-=======
-const TOP_TRADERS = [
-  { rank: 1, name: 'NovaX', amount: '+$140.50', avatar: 1 },
-  { rank: 2, name: 'BitLrd', amount: '+$140.50', avatar: 2 },
-  { rank: 3, name: 'ZenMaster', amount: '+$140.50', avatar: 3 },
-]
-
-export default function Trading() {
-  const [amount, setAmount] = useState(50)
   const [tab, setTab] = useState('Open positions')
-  const [activeSymbol, setActiveSymbol] = useState('BTC')
+  const [mobileTab, setMobileTab] = useState('Trade')
   const [chartInterval, setChartInterval] = useState('5')
->>>>>>> f2080c6932ae2cf7cf18700224531092c8146a30
-
-  const [tab, setTab] = useState('Open positions')
   const [now, setNow] = useState(Date.now())
 
   useEffect(() => {
@@ -471,14 +577,26 @@ export default function Trading() {
 
   return (
     <div className="trading-grid">
-      <div className="trading-main">
+      {/* ---- Mobile top tabs ---- */}
+      <nav className="mob-tabs">
+        {MOBILE_TABS.map((t) => (
+          <button
+            key={t}
+            type="button"
+            className={`mob-tabs__btn${mobileTab === t ? ' is-active' : ''}`}
+            onClick={() => setMobileTab(t)}
+          >
+            {t}
+          </button>
+        ))}
+      </nav>
+
+      {/* ---- Desktop + Mobile: Trade tab ---- */}
+      <div className={`trading-main ${mobileTab !== 'Trade' ? 'mob-hide' : ''}`}>
         <section className="content-card trading-chart-card">
           <div className="trading-chart-card__header">
             <div className="trading-chart-card__picker">
-<<<<<<< HEAD
               <CoinPicker value={activeSymbol} onChange={setSymbol} />
-=======
-              <CoinPicker value={activeSymbol} onChange={setActiveSymbol} />
               <span className="trading-chart-card__change">+70.5%</span>
             </div>
             <div className="trading-chart-card__intervals">
@@ -492,13 +610,13 @@ export default function Trading() {
                   {it.label}
                 </button>
               ))}
->>>>>>> f2080c6932ae2cf7cf18700224531092c8146a30
             </div>
           </div>
           <TradingViewChart symbol={activeCoin.tv} interval={chartInterval} height={520} />
         </section>
 
-        <section className="content-card trading-positions">
+        {/* Desktop positions (hidden on mobile) */}
+        <section className="content-card trading-positions desk-only">
           <div className="tabs">
             {TABS.map((t) => (
               <button
@@ -545,8 +663,8 @@ export default function Trading() {
         </section>
       </div>
 
-      <div className="trading-side">
-<<<<<<< HEAD
+      {/* ---- Desktop sidebar (hidden on mobile) ---- */}
+      <div className="trading-side desk-only">
         {isAuthenticated ? (
           <>
             <TradePanel activeSymbol={activeSymbol} />
@@ -555,81 +673,6 @@ export default function Trading() {
         ) : (
           <TradeAuthCta />
         )}
-=======
-        <section className="card trading-trade">
-          <h3 className="card__title">Trade</h3>
-          <div>
-            <div className="trading-trade__row">
-              <span className="trading-trade__label">Amount</span>
-            </div>
-            <div className="trading-trade__amounts">
-              {AMOUNTS.map((v) => (
-                <button
-                  key={v}
-                  type="button"
-                  className={`amount-btn${amount === v ? ' is-active' : ''}`}
-                  onClick={() => setAmount(v)}
-                >
-                  {v}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div>
-            <div className="trading-trade__row" style={{ justifyContent: 'space-between' }}>
-              <span className="trading-trade__label">Timer</span>
-              <span style={{ font: '900 18px/1 var(--app-font)', color: 'var(--app-text)' }}>
-                00:32
-              </span>
-            </div>
-            <div className="trading-trade__progress">
-              <div className="trading-trade__progress-fill" />
-            </div>
-          </div>
-
-          <div className="trading-trade__row" style={{ justifyContent: 'space-between' }}>
-            <div>
-              <div className="trading-trade__label" style={{ marginBottom: 2 }}>
-                Payout
-              </div>
-              <div style={{ font: '700 13px/1 var(--app-font)', color: 'var(--app-text)' }}>
-                85%
-              </div>
-            </div>
-            <div style={{ textAlign: 'right' }}>
-              <div className="trading-trade__label" style={{ marginBottom: 2 }}>
-                Amount
-              </div>
-              <div style={{ font: '700 13px/1 var(--app-font)', color: 'var(--app-text)' }}>
-                ${(amount * 1.85).toFixed(2)}
-              </div>
-            </div>
-          </div>
-
-          <button type="button" className="trade-cta trade-cta--up">
-            UP
-          </button>
-          <button type="button" className="trade-cta trade-cta--down">
-            DOWN
-          </button>
-        </section>
-
-        <section className="card trading-balance-card">
-          <h3 className="card__title">Your Balance</h3>
-          <div className="trading-balance-amount">
-            1,530.45<span>USDT</span>
-          </div>
-          <div style={{ display: 'flex', gap: 8 }}>
-            <button type="button" className="balance-btn">
-              Withdraw
-            </button>
-            <button type="button" className="balance-btn balance-btn--primary">
-              Deposit
-            </button>
-          </div>
-        </section>
->>>>>>> f2080c6932ae2cf7cf18700224531092c8146a30
 
         <section className="card trading-tournament">
           <div className="trading-tournament__header">
@@ -651,48 +694,65 @@ export default function Trading() {
             </Link>
           </div>
         </section>
-<<<<<<< HEAD
-=======
+      </div>
 
-        <section className="card">
-          <h3 className="card__title">Top Traders</h3>
-          {TOP_TRADERS.map((t) => (
-            <div
-              key={t.rank}
-              className="market-row"
-              style={{ background: 'var(--app-row-bg)' }}
-            >
-              <span
-                className="cell"
-                style={{
-                  width: 18,
-                  fontSize: 10,
-                  color: t.rank === 1 ? 'var(--app-accent)' : 'var(--app-text-dim)',
-                }}
+      {/* ---- Mobile: Trade panel (below chart) ---- */}
+      <div className={`mob-trade-panel ${mobileTab !== 'Trade' ? 'mob-hide' : ''}`}>
+        {isAuthenticated ? (
+          <TradePanel activeSymbol={activeSymbol} />
+        ) : (
+          <TradeAuthCta />
+        )}
+      </div>
+
+      {/* ---- Mobile: Positions tab ---- */}
+      <div className={`mob-positions ${mobileTab !== 'Positions' ? 'mob-hide' : ''}`}>
+        <section className="content-card trading-positions">
+          <div className="tabs">
+            {['Open positions', 'History', 'Orders'].map((t) => (
+              <button
+                key={t}
+                type="button"
+                className={`tab${tab === t ? ' is-active' : ''}`}
+                onClick={() => setTab(t)}
               >
-                #{t.rank}
-              </span>
-              <span className={`trader-avatar trader-avatar--${t.avatar}`}>
-                {t.name.slice(0, 1)}
-              </span>
-              <span
-                className="market-row__name"
-                style={{ flexDirection: 'column', alignItems: 'flex-start' }}
-              >
-                <span style={{ font: '700 12px/1.2 var(--app-font)', color: '#fff' }}>
-                  {t.name}
-                </span>
-                <span style={{ font: '400 9px/1.2 var(--app-font)', color: 'var(--app-text-muted)' }}>
-                  24h Performance
-                </span>
-              </span>
-              <span className="cell--up" style={{ font: '700 12px/1 var(--app-font)' }}>
-                {t.amount}
-              </span>
+                {t}
+                {t === 'Open positions' && openPositions.length > 0 && (
+                  <span className="tab__badge">{openPositions.length}</span>
+                )}
+              </button>
+            ))}
+          </div>
+
+          <div className="data-table">
+            <div className="data-table__head" style={{ gridTemplateColumns: MOBILE_POS_COLS }}>
+              <span>Asset</span>
+              <span>Time</span>
+              <span>Investment</span>
+              <span>Profit</span>
+              <span style={{ textAlign: 'right' }}>Status</span>
             </div>
-          ))}
+
+            {visiblePositions.length === 0 ? (
+              <div className="data-table__empty">
+                {tab === 'Open positions'
+                  ? isAuthenticated
+                    ? 'No open positions yet.'
+                    : 'Sign in to open positions.'
+                  : 'No closed trades yet.'}
+              </div>
+            ) : (
+              visiblePositions.map((p) => (
+                <MobilePositionRow key={p.id} position={p} now={now} />
+              ))
+            )}
+          </div>
         </section>
->>>>>>> f2080c6932ae2cf7cf18700224531092c8146a30
+      </div>
+
+      {/* ---- Mobile: Traders tab ---- */}
+      <div className={`mob-traders-wrap ${mobileTab !== 'Traders' ? 'mob-hide' : ''}`}>
+        <TradersPanel />
       </div>
     </div>
   )

@@ -235,6 +235,7 @@
   background: var(--auth-input-bg);
   border: 1px solid transparent;
   border-radius: var(--auth-radius);
+  overflow: hidden;
   transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 

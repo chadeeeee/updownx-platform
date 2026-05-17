@@ -57,10 +57,7 @@
     0 12px 32px rgba(0, 0, 0, 0.5);
   display: flex;
   flex-direction: column;
-<<<<<<< HEAD
   justify-content: space-between;
-=======
->>>>>>> f2080c6932ae2cf7cf18700224531092c8146a30
 }
 
 .tournament-banner__bg {
@@ -95,24 +92,12 @@
   display: inline-flex;
   align-items: center;
   gap: 8px;
-<<<<<<< HEAD
   padding: 6px 12px;
   border-radius: 9999px;
   background: rgba(5, 7, 10, 0.7);
   border: 1px solid rgba(0, 255, 163, 0.4);
   font: 800 11px/1 var(--app-font);
   letter-spacing: 0.8px;
-=======
-  flex: 1;
-}
-
-.tournament-banner__title {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  font: 900 72px/1 var(--app-font);
-  letter-spacing: -3.6px;
->>>>>>> f2080c6932ae2cf7cf18700224531092c8146a30
   text-transform: uppercase;
   color: var(--app-accent);
   backdrop-filter: blur(6px);
@@ -143,14 +128,11 @@
 }
 
 .tournament-banner__bottom {
-<<<<<<< HEAD
   position: relative;
   z-index: 1;
   padding: 20px 28px 22px;
-=======
   margin-top: auto;
   width: 100%;
->>>>>>> f2080c6932ae2cf7cf18700224531092c8146a30
   display: flex;
   align-items: flex-end;
   justify-content: space-between;

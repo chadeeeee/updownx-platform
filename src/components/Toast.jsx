@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
 import './Toast.css'
 
-export default function Toast({ message, kind = 'success', duration = 3500, onClose }) {
+export default function Toast({ message, kind = 'success', duration = 5000, onClose }) {
   const [visible, setVisible] = useState(false)
 
   useEffect(() => {

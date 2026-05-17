@@ -62,7 +62,7 @@
   display: grid;
   grid-template-columns: 2fr 1fr;
   gap: 16px;
-  align-items: stretch;
+  align-items: start;
 }
 
 .balance-total,
@@ -89,7 +89,7 @@
   z-index: 0;
 }
 
-.balance-total > * {
+.balance-total > *:not(.balance-total__bg-mark) {
   position: relative;
   z-index: 1;
 }
@@ -148,7 +148,6 @@
   display: flex;
   flex-direction: column;
   gap: 10px;
-  flex: 1;
 }
 
 .balance-stats__row {
@@ -256,10 +255,10 @@
   color: var(--app-text);
 }
 
-/* -------------------- Bottom grid: Deposit + Transactions (legacy, unused) -------------------- */
+/* -------------------- Bottom grid: Deposit + Transactions -------------------- */
 .balance-page__bottom-grid {
   display: grid;
-  grid-template-columns: minmax(320px, 380px) 1fr;
+  grid-template-columns: minmax(300px, 360px) 1fr;
   gap: 16px;
   align-items: stretch;
 }
@@ -429,7 +428,7 @@
 
 .balance-tx__row {
   display: grid;
-  grid-template-columns: 110px 90px 90px 100px 110px 90px;
+  grid-template-columns: 1.1fr 0.9fr 0.8fr 1fr 1fr 1fr;
   align-items: center;
   gap: 8px;
   background: var(--app-row-bg);
@@ -450,8 +449,16 @@
   color: var(--app-accent);
 }
 
+.balance-tx__type--in svg {
+  color: var(--app-accent);
+}
+
 .balance-tx__type--out svg {
-  color: #fbbf24;
+  color: var(--app-danger);
+}
+
+.balance-tx__type--processing svg {
+  color: #38bdf8;
 }
 
 .balance-tx__asset {
@@ -520,5 +527,109 @@
 
   .balance-tx__row {
     grid-template-columns: 1fr 1fr;
+  }
+}
+
+/* -------------------- Mobile sub-tabs (hidden on desktop) -------------------- */
+.balance-mobile-tabs {
+  display: none;
+}
+
+.balance-total__mobile-actions {
+  display: none;
+}
+
+.balance-empty-pane {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  /* Hide the desktop page header (title + actions) on mobile */
+  .balance-page__header { display: none; }
+
+  /* Sub-tabs strip — matches Trading page pill-style tabs */
+  .balance-mobile-tabs {
+    display: flex;
+    gap: 0;
+    background: var(--app-card-bg);
+    border: 1px solid var(--app-border);
+    border-radius: 12px;
+    padding: 4px;
+  }
+
+  .balance-mobile-tab {
+    flex: 1;
+    background: transparent;
+    border: 0;
+    padding: 10px 6px;
+    font: 600 13px/1 var(--app-font);
+    color: var(--app-text-muted);
+    cursor: pointer;
+    border-radius: 8px;
+    transition: color 0.15s ease, background 0.15s ease;
+  }
+
+  .balance-mobile-tab.is-active {
+    color: var(--app-accent);
+    background: rgba(0, 255, 163, 0.08);
+  }
+
+  /* Active-tab visibility — hide panes that do not match the current tab */
+  .balance-page--tab-balance .balance-mobile-pane:not(.balance-mobile-pane--balance),
+  .balance-page--tab-deposit .balance-mobile-pane:not(.balance-mobile-pane--deposit),
+  .balance-page--tab-markets .balance-mobile-pane:not(.balance-mobile-pane--markets),
+  .balance-page--tab-traders .balance-mobile-pane:not(.balance-mobile-pane--traders) {
+    display: none;
+  }
+
+  /* Show the empty Markets/Traders panes only when their tab is active */
+  .balance-page--tab-markets .balance-empty-pane.balance-mobile-pane--markets,
+  .balance-page--tab-traders .balance-empty-pane.balance-mobile-pane--traders {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 240px;
+    color: var(--app-text-muted);
+    font: 600 14px/1.4 var(--app-font);
+    text-align: center;
+  }
+
+  /* Mobile Deposit/Withdraw buttons inside the Total Balance card */
+  .balance-total__mobile-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 14px;
+  }
+
+  .balance-total__mobile-actions .balance-action-btn {
+    width: 100%;
+    justify-content: center;
+    padding: 14px 16px;
+    font-size: 14px;
+  }
+
+  /* Tx row: 2-row layout matching the mobile screenshot */
+  .balance-tx__row {
+    grid-template-columns: 1.4fr 0.9fr 1fr;
+    grid-template-rows: auto auto;
+    grid-template-areas:
+      'type   amount status'
+      'asset  amount date';
+    row-gap: 4px;
+    padding: 12px 14px;
+  }
+
+  .balance-tx__type   { grid-area: type;   align-self: end; }
+  .balance-tx__asset  { grid-area: asset;  align-self: start; padding-left: 22px; }
+  .balance-tx__amount { grid-area: amount; align-self: center; text-align: center; }
+  .balance-tx__row > span:has(> .balance-tx__status) { grid-area: status; justify-self: end; align-self: end; }
+  .balance-tx__date   { grid-area: date;   justify-self: end; align-self: start; text-align: right; }
+  .balance-tx__hash   { display: none; }
+
+  .balance-tx__asset span {
+    display: inline;
+    margin-left: 4px;
+    color: var(--app-text-muted);
   }
 }
