@@ -1,3 +1,4 @@
+import { useLayoutEffect, useRef, useState } from 'react'
 import { Pagination } from './_shared'
 import { TRADER_HANDLES, avatarColors, avatarInitials } from '../data/traders'
 import '../components/AppLayout.css'
@@ -13,21 +14,26 @@ const LEADERBOARD = [
   { rank: '05', name: 'PixelPump',   profit: '+4,820.90',  winRate: '64% WR',    last: 'BTC/USDT', when: '11m ago' },
 ]
 
-const ACTIVITY = [
-  { user: '@SatoshiX',    pair: 'BTC/USDT UP',   amount: '+$192.00', dir: 'up',   when: 'Just now' },
-  { user: '@RektQueen',   pair: 'ETH/USDT DOWN', amount: '-$48.00',  dir: 'down', when: '1m ago' },
-  { user: '@HodlHero',    pair: 'SOL/USDT UP',   amount: '+$84.00',  dir: 'up',   when: '3m ago' },
-  { user: '@NeoLambo',    pair: 'BTC/USDT UP',   amount: '+$460.00', dir: 'up',   when: '4m ago' },
-  { user: '@OnChainOwl',  pair: 'XRP/USDT UP',   amount: '+$23.00',  dir: 'up',   when: '5m ago' },
-  { user: '@PixelPump',   pair: 'DOGE/USDT DOWN', amount: '-$17.50', dir: 'down', when: '7m ago' },
-  { user: '@CipherKai',   pair: 'LTC/USDT UP',   amount: '+$118.00', dir: 'up',   when: '9m ago' },
-]
-
 const WARRIORS = [
   { title: 'Weekend Warrior',   desc: 'Short-term high volatility scalp battle.',  prize: '1,200 USDT' },
   { title: 'Altcoin Arena',     desc: 'Trade only alts — top mover takes the pot.', prize: '2,400 USDT' },
   { title: 'Volatility Vault',  desc: 'Reward grows the further price swings.',    prize: '3,800 USDT' },
 ]
+
+// Trading activity feed — handles cycled from the shared trader pool so avatars
+// stay consistent with the leaderboard. We render plenty of rows; CSS clips
+// any that don't fit so the column always reaches the bottom of the layout.
+const ACTIVITY = Array.from({ length: 24 }, (_, i) => {
+  const isLoss = i % 5 === 1
+  const minutesAgo = i * 2
+  return {
+    user: `@${TRADER_HANDLES[i % TRADER_HANDLES.length]}`,
+    pair: 'BTC/USDT LONG',
+    amount: isLoss ? '-$12.20' : '+$56.00',
+    dir: isLoss ? 'down' : 'up',
+    when: minutesAgo === 0 ? 'Just now' : `${minutesAgo}m ago`,
+  }
+})
 
 function TraderCell({ name }) {
   const [a, b] = avatarColors(name)
@@ -47,21 +53,53 @@ function TraderCell({ name }) {
   )
 }
 
-function ActivityAvatar({ handle }) {
-  const [a, b] = avatarColors(handle)
-  return (
-    <span
-      className="activity-item__avatar"
-      style={{ background: `linear-gradient(135deg, ${a}, ${b})` }}
-    >
-      {avatarInitials(handle)}
-    </span>
-  )
-}
-
 export default function Tournaments() {
+  const mainRef = useRef(null)
+  const activityRef = useRef(null)
+  const activityListRef = useRef(null)
+  const [visibleActivity, setVisibleActivity] = useState(ACTIVITY.length)
+
+  // Match the activity column height to the main (banner + leaderboard) column
+  // so it ends exactly at the bottom of the third leaderboard row, and render
+  // only the rows that fully fit (no clipped half-row at the bottom).
+  useLayoutEffect(() => {
+    const main = mainRef.current
+    const activity = activityRef.current
+    const list = activityListRef.current
+    if (!main || !activity || !list) return undefined
+
+    const sync = () => {
+      activity.style.height = `${main.offsetHeight}px`
+      const row = list.querySelector('.tournament-activity__row')
+      if (!row) return
+      const rowH = row.getBoundingClientRect().height
+      if (!rowH) return
+      const styles = getComputedStyle(list)
+      const gap = parseFloat(styles.rowGap || styles.gap || '0') || 0
+      const avail = list.clientHeight
+      const n = Math.max(1, Math.floor((avail + gap) / (rowH + gap)))
+      setVisibleActivity(Math.min(ACTIVITY.length, n))
+    }
+    sync()
+    const ro = new ResizeObserver(sync)
+    ro.observe(main)
+    ro.observe(list)
+    window.addEventListener('resize', sync)
+    return () => {
+      ro.disconnect()
+      window.removeEventListener('resize', sync)
+    }
+  }, [])
+
   return (
     <div className="tournament-layout">
+      {/* Mobile-only top tab nav for the Tournaments page. */}
+      <nav className="mob-top-nav">
+        <span className="mob-top-nav__btn is-active">Home</span>
+        <span className="mob-top-nav__btn">Markets</span>
+        <span className="mob-top-nav__btn">Traders</span>
+      </nav>
+
       <section className="content-card tournament-card">
         <header className="tournament-header">
           <h1 className="page-title">Tournaments</h1>
@@ -72,6 +110,9 @@ export default function Tournaments() {
             <span className="badge badge--danger">⏱ Ends in: 02d 14h 30m</span>
           </div>
         </header>
+
+        <div className="tournament-inner">
+          <div className="tournament-main" ref={mainRef}>
 
         <div className="tournament-banner">
           <div className="tournament-banner__bg" />
@@ -104,7 +145,7 @@ export default function Tournaments() {
           </div>
         </div>
 
-        <div className="data-table">
+        <div className="data-table tournament-leaderboard">
           <div
             className="data-table__head"
             style={{ gridTemplateColumns: '60px 1.4fr 1fr 1fr 1fr' }}
@@ -115,10 +156,10 @@ export default function Tournaments() {
             <span>Win-Loss</span>
             <span style={{ textAlign: 'right' }}>Last Trade</span>
           </div>
-          {LEADERBOARD.map((row) => (
+          {LEADERBOARD.slice(0, 3).map((row) => (
             <div
               key={row.rank}
-              className="data-table__row"
+              className="data-table__row tournament-leaderboard__row"
               style={{ gridTemplateColumns: '60px 1.4fr 1fr 1fr 1fr', height: 52 }}
             >
               <span
@@ -170,6 +211,29 @@ export default function Tournaments() {
           ))}
         </div>
 
+          </div>
+
+          <aside className="tournament-activity" ref={activityRef}>
+            <h3 className="tournament-activity__title">Trading Activity</h3>
+            <div className="tournament-activity__list" ref={activityListRef}>
+              {ACTIVITY.slice(0, visibleActivity).map((a, i) => (
+                <div key={`${a.user}-${i}`} className="tournament-activity__row">
+                  <div className="tournament-activity__info">
+                    <div className="tournament-activity__user">{a.user}</div>
+                    <div className="tournament-activity__pair">{a.pair}</div>
+                  </div>
+                  <div className="tournament-activity__meta">
+                    <div className={`tournament-activity__amount ${a.dir === 'up' ? 'is-up' : 'is-down'}`}>
+                      {a.amount}
+                    </div>
+                    <div className="tournament-activity__when">{a.when.toUpperCase()}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </aside>
+        </div>
+
         <div className="warriors-grid">
           {WARRIORS.map((w, i) => (
             <article key={w.title} className={`warrior-card warrior-card--${i + 1}`}>
@@ -193,58 +257,6 @@ export default function Tournaments() {
 
         <Pagination total={24} page={1} pageSize={4} />
       </section>
-
-      <aside className="tournament-activity card">
-        <h3 className="card__title">Trading Activity</h3>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-          {ACTIVITY.map((a, i) => (
-            <div key={`${a.user}-${i}`} className="activity-item">
-              <div style={{ display: 'flex', alignItems: 'center', gap: 10, minWidth: 0 }}>
-                <ActivityAvatar handle={a.user} />
-                <div style={{ minWidth: 0 }}>
-                  <div
-                    style={{
-                      font: '700 13px/1 var(--app-font)',
-                      color: 'var(--app-text)',
-                      whiteSpace: 'nowrap',
-                      overflow: 'hidden',
-                      textOverflow: 'ellipsis',
-                    }}
-                  >
-                    {a.user}
-                  </div>
-                  <div
-                    style={{
-                      font: '600 10px/1 var(--app-font)',
-                      color: 'var(--app-text-muted)',
-                      marginTop: 4,
-                    }}
-                  >
-                    {a.pair}
-                  </div>
-                </div>
-              </div>
-              <div style={{ textAlign: 'right', flexShrink: 0 }}>
-                <div
-                  className={a.dir === 'up' ? 'cell--up' : 'cell--down'}
-                  style={{ font: '900 13px/1 var(--app-font)' }}
-                >
-                  {a.amount}
-                </div>
-                <div
-                  style={{
-                    font: '600 9px/1 var(--app-font)',
-                    color: 'var(--app-text-muted)',
-                    marginTop: 4,
-                  }}
-                >
-                  {a.when}
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </aside>
     </div>
   )
 }

@@ -1,0 +1,86 @@
+/* History page styles — mostly mobile responsiveness. */
+
+/* Time stacked under the symbol in the first cell is mobile-only;
+   on desktop the time has its own dedicated column. */
+.hx-symbol__time {
+  display: none;
+}
+
+/* Mobile-only date range bar (replaces the tabs on small screens). */
+.hx-daterange {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  /* Mobile top tab nav margin tweak so it sits flush with the card. */
+  .history-page .mob-top-nav {
+    margin: 0 0 12px;
+  }
+
+  .history-page .page-title,
+  .history-page .page-subtitle {
+    display: none;
+  }
+
+  /* Hide desktop tabs and table head on mobile. */
+  .history-page .tabs {
+    display: none;
+  }
+  .history-page .data-table__head {
+    display: none;
+  }
+
+  /* Date range bar */
+  .hx-daterange {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 12px 14px;
+    border: 1px solid var(--app-border);
+    border-radius: 12px;
+    background: var(--app-card-bg);
+    color: var(--app-text);
+    font: 600 13px/1 var(--app-font);
+    margin-bottom: 12px;
+  }
+  .hx-daterange__left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .hx-daterange__icon {
+    color: var(--app-accent);
+  }
+
+  /* Row layout: BTC/date · WIN · % · USDT · +PNL */
+  .history-page .data-table {
+    gap: 8px;
+  }
+  .history-page .data-table__row {
+    grid-template-columns: 1.5fr auto auto auto auto !important;
+    gap: 8px;
+    padding: 10px 12px;
+    height: auto !important;
+  }
+  .history-page .data-table__row > :nth-child(6) {
+    display: none; /* hide standalone time column — merged into first cell */
+  }
+  .hx-symbol__time {
+    display: block;
+    font: 600 10px/1 var(--app-font);
+    color: var(--app-text-muted);
+    margin-top: 4px;
+  }
+  .hx-symbol__pair {
+    font: 800 13px/1 var(--app-font);
+  }
+  .history-page .data-table__row .cell {
+    font-size: 12px;
+  }
+
+  /* Pagination spacing on mobile */
+  .history-page .pagination {
+    margin-top: 12px;
+  }
+}

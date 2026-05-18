@@ -4,7 +4,7 @@
   display: grid;
   grid-template-columns: 1fr 320px;
   gap: 16px;
-  align-items: stretch;
+  align-items: end;
 }
 
 .trading-main {
@@ -12,12 +12,16 @@
   flex-direction: column;
   gap: 16px;
   min-width: 0;
+  grid-column: 1;
+  grid-row: 1 / -1;
 }
 
 .trading-side {
   display: flex;
   flex-direction: column;
   gap: 16px;
+  grid-row: 1 / -1;
+  grid-column: 2;
 }
 
 .trading-chart-card {
@@ -300,7 +304,6 @@
 
 /* -------------------- BULL VS BEAR (sidebar tournament card) -------------------- */
 .trading-tournament {
-  flex: 1;
   background:
     radial-gradient(circle at 0% 0%, rgba(0, 255, 163, 0.18) 0%, transparent 60%),
     radial-gradient(circle at 100% 100%, rgba(0, 255, 163, 0.08) 0%, transparent 60%),
@@ -782,6 +785,166 @@
 .mob-trade-panel { display: none; }
 .mob-positions { display: none; }
 .mob-traders-wrap { display: none; }
+.mob-markets-wrap { display: none; }
+.mob-only { display: none; }
+
+/* ==================== Mobile Markets panel ==================== */
+.mob-markets {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.mob-markets__search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--app-row-bg);
+  border: 1px solid var(--app-border-soft);
+  border-radius: 10px;
+  padding: 10px 12px;
+  color: var(--app-text-muted);
+}
+
+.mob-markets__search input {
+  flex: 1;
+  background: transparent;
+  border: 0;
+  outline: 0;
+  color: var(--app-text);
+  font: 500 13px/1 var(--app-font);
+}
+
+.mob-markets__search input::placeholder {
+  color: var(--app-text-muted);
+}
+
+.mob-markets__list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.mob-markets__row {
+  display: grid;
+  grid-template-columns: 1.2fr 1.2fr auto;
+  align-items: center;
+  gap: 10px;
+  background: var(--app-row-bg);
+  border: 1px solid var(--app-border-soft);
+  border-radius: 12px;
+  padding: 12px 14px;
+}
+
+/* On narrow phones, reflow into two rows: asset+button on top, stats below. */
+@media (max-width: 520px) {
+  .mob-markets__row {
+    grid-template-columns: 1fr auto;
+    grid-template-areas:
+      'asset trade'
+      'stats stats';
+    row-gap: 8px;
+    padding: 12px;
+  }
+
+  .mob-markets__asset { grid-area: asset; min-width: 0; }
+  .mob-markets__trade-btn { grid-area: trade; align-self: center; }
+
+  .mob-markets__stats {
+    grid-area: stats;
+    flex-direction: row;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 6px 10px;
+    padding-left: 42px; /* align with text after the coin icon */
+  }
+
+  .mob-markets__volume-label {
+    margin-left: auto;
+  }
+}
+
+.mob-markets__asset {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.mob-markets__asset-text {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.mob-markets__symbol {
+  font: 800 14px/1 var(--app-font);
+  color: var(--app-text);
+  white-space: nowrap;
+}
+
+.mob-markets__symbol span {
+  color: var(--app-text-muted);
+  font-weight: 600;
+}
+
+.mob-markets__price {
+  font: 700 14px/1 var(--app-font);
+  color: var(--app-text);
+  white-space: nowrap;
+}
+
+.mob-markets__stats {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 3px;
+  min-width: 0;
+}
+
+.mob-markets__change {
+  font: 800 14px/1 var(--app-font);
+  color: var(--app-text);
+}
+
+.mob-markets__change.is-up {
+  color: var(--app-accent);
+}
+
+.mob-markets__change.is-down {
+  color: var(--app-danger);
+}
+
+.mob-markets__volume-label {
+  font: 700 9px/1 var(--app-font);
+  letter-spacing: 0.4px;
+  color: var(--app-text-muted);
+  text-transform: uppercase;
+}
+
+.mob-markets__volume {
+  font: 700 12px/1 var(--app-font);
+  color: var(--app-text);
+  white-space: nowrap;
+}
+
+.mob-markets__trade-btn {
+  background: var(--app-accent);
+  color: #05070a;
+  border: 0;
+  border-radius: 10px;
+  padding: 12px 18px;
+  font: 900 12px/1 var(--app-font);
+  letter-spacing: 0.6px;
+  cursor: pointer;
+  box-shadow: 0 0 14px rgba(0, 255, 163, 0.25);
+  transition: filter 0.15s ease;
+}
+
+.mob-markets__trade-btn:hover {
+  filter: brightness(1.05);
+}
 
 /* ==================== Traders panel ==================== */
 .mob-traders {
@@ -895,7 +1058,9 @@
   /* Show mobile elements */
   .mob-trade-panel,
   .mob-positions,
-  .mob-traders-wrap {
+  .mob-traders-wrap,
+  .mob-markets-wrap,
+  .mob-only {
     display: block;
   }
 
@@ -965,5 +1130,30 @@
 
   .mob-pos-row {
     padding: 8px 4px;
+  }
+
+  /* Tighten tabs strip so labels fit on one line */
+  .mob-positions .tabs {
+    gap: 14px;
+  }
+
+  .mob-positions .tab {
+    font-size: 11px;
+    letter-spacing: 0.3px;
+    padding: 8px 2px;
+    white-space: nowrap;
+  }
+
+  /* Add spacing between table head/row columns and shrink labels */
+  .mob-positions .data-table__head {
+    column-gap: 8px;
+    padding: 0 10px;
+    font-size: 9px;
+    letter-spacing: 0.4px;
+  }
+
+  .mob-positions .data-table__row {
+    column-gap: 8px;
+    padding: 6px 10px;
   }
 }

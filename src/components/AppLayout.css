@@ -260,9 +260,25 @@
   display: flex;
   flex-direction: column;
   gap: 16px;
-  position: sticky;
-  top: 24px;
+  /* Height is synchronised with the main content column via a ResizeObserver
+     in AppLayout.jsx, so the Live Trades card always ends at the same
+     baseline as the last content card on the right. */
   align-self: start;
+}
+
+/* Last sidebar card (Live Trades) fills the remaining vertical space inside
+   the bounded sidebar; rows that don't fit are clipped. */
+.app-sidebar > .card:last-child {
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* Inside the Live Trades card, the list grows to fill the card and clips
+   trades that don't fit — taller pages naturally show more rows. */
+.app-sidebar .live-trades {
+  flex: 1;
+  overflow: hidden;
 }
 
 .card {
@@ -673,7 +689,7 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  overflow: hidden;
+  overflow: visible;
   flex-shrink: 0;
   padding: 0;
   outline: none;
@@ -999,7 +1015,7 @@
 
 .account-header__avatar--btn {
   cursor: pointer;
-  overflow: hidden;
+  overflow: visible;
   padding: 0;
   outline: none;
 }
@@ -1324,6 +1340,15 @@
   transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
+select.account-input {
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' fill='none'%3E%3Cpath d='M1 1.5l5 5 5-5' stroke='%236b7280' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 16px center;
+  padding-right: 40px;
+}
+
 .account-input:focus {
   border-color: var(--app-accent);
   box-shadow: 0 0 0 2px rgba(0, 255, 163, 0.12);
@@ -1479,6 +1504,11 @@
   }
 }
 
+/* ==================== Mobile top tab nav (hidden on desktop) ==================== */
+.mob-top-nav {
+  display: none;
+}
+
 /* ==================== Mobile bottom nav (hidden on desktop) ==================== */
 .mob-bottom-nav {
   display: none;
@@ -1525,6 +1555,36 @@
   }
 
   .app-sidebar { display: none; }
+
+  /* ---- Top tab nav (Home / Markets / Traders) ---- */
+  .mob-top-nav {
+    display: flex;
+    gap: 0;
+    margin: 12px 12px 0;
+    padding: 4px;
+    background: var(--app-card-bg);
+    border: 1px solid var(--app-border);
+    border-radius: 12px;
+  }
+
+  .mob-top-nav__btn {
+    flex: 1;
+    background: transparent;
+    border: 0;
+    padding: 10px 6px;
+    font: 600 13px/1 var(--app-font);
+    color: var(--app-text-muted);
+    text-align: center;
+    text-decoration: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: color 0.15s ease, background 0.15s ease;
+  }
+
+  .mob-top-nav__btn.is-active {
+    color: var(--app-accent);
+    background: rgba(0, 255, 163, 0.08);
+  }
 
   /* ---- Bottom nav ---- */
   .mob-bottom-nav {

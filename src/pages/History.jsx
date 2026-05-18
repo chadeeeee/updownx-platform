@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Pagination, Pill } from './_shared'
 import CoinIcon from '../components/CoinIcon'
 import '../components/AppLayout.css'
+import './History.css'
 
 const TABS = ['All', 'Trading', 'Deposits', 'Withdrawals']
 
@@ -27,11 +28,32 @@ export default function History() {
   const COLS = '1.5fr 80px 80px 100px 100px 130px'
 
   return (
-    <section className="content-card">
+    <section className="content-card history-page">
+      {/* Mobile-only top nav (Home / Markets / Traders) */}
+      <nav className="mob-top-nav">
+        <span className="mob-top-nav__btn is-active">Home</span>
+        <span className="mob-top-nav__btn">Markets</span>
+        <span className="mob-top-nav__btn">Traders</span>
+      </nav>
+
       <h1 className="page-title">History</h1>
       <p className="page-subtitle">
         Review your trading activity and financial logs across all assets.
       </p>
+
+      {/* Mobile-only date range selector */}
+      <div className="hx-daterange">
+        <span className="hx-daterange__left">
+          <svg className="hx-daterange__icon" width="18" height="18" viewBox="0 0 24 24" fill="none">
+            <rect x="3" y="5" width="18" height="16" rx="2" stroke="currentColor" strokeWidth="1.8" />
+            <path d="M8 3v4M16 3v4M3 10h18" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+          </svg>
+          Oct 01, 2026 - Oct 31, 2026
+        </span>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M6 9l6 6 6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+      </div>
 
       <div className="tabs">
         {TABS.map((t) => (
@@ -60,9 +82,12 @@ export default function History() {
           <div key={i} className="data-table__row" style={{ gridTemplateColumns: COLS }}>
             <span style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
               <CoinIcon symbol="BTC" />
-              <span className="cell">
-                <span className="market-row__symbol">BTC</span>
-                <span className="market-row__pair">/USDT</span>
+              <span className="cell" style={{ display: 'flex', flexDirection: 'column' }}>
+                <span className="hx-symbol__pair">
+                  <span className="market-row__symbol">BTC</span>
+                  <span className="market-row__pair">/USDT</span>
+                </span>
+                <span className="hx-symbol__time">{row.time}</span>
               </span>
             </span>
             <span>

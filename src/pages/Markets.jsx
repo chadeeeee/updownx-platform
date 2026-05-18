@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { Pagination, TradeButton } from './_shared'
 import CoinIcon from '../components/CoinIcon'
 import useBinancePrices, {
@@ -7,7 +8,9 @@ import useBinancePrices, {
   formatChange,
 } from '../hooks/useBinancePrices'
 import { COINS } from '../data/coins'
+import { useMarket } from '../context/MarketContext'
 import '../components/AppLayout.css'
+import './Trading.css'
 
 const PAGE_SIZE = 13
 
@@ -22,6 +25,8 @@ export default function Markets() {
   const [page, setPage] = useState(1)
   const [query, setQuery] = useState('')
   const { tickers, loading } = useBinancePrices()
+  const { setSymbol } = useMarket()
+  const navigate = useNavigate()
 
   const filtered = COINS.filter(
     (c) =>
@@ -35,8 +40,14 @@ export default function Markets() {
 
   const COLS = '1.5fr 1fr 1fr 1.5fr 100px'
 
+  const handleTrade = (symbol) => {
+    setSymbol(symbol)
+    navigate('/trading')
+  }
+
   return (
-    <section className="content-card">
+    <>
+    <section className="content-card desk-only">
       <div
         style={{
           display: 'flex',
@@ -127,5 +138,81 @@ export default function Markets() {
         totalPages={totalPages}
       />
     </section>
+
+    {/* Mobile view */}
+    <section className="content-card mob-only">
+      <div className="mob-markets">
+        <label className="mob-markets__search">
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+            <circle cx="7" cy="7" r="5" stroke="currentColor" strokeWidth="1.5" />
+            <path d="m11 11 3 3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+          </svg>
+          <input
+            type="search"
+            placeholder="Search..."
+            value={query}
+            onChange={(e) => {
+              setQuery(e.target.value)
+              setPage(1)
+            }}
+          />
+        </label>
+
+        <div className="mob-markets__list">
+          {rows.map((coin) => {
+            const t = tickers[binanceSymbolFor(coin)]
+            const change = t ? t.priceChangePercent : null
+            const isUp = change != null && change >= 0
+            return (
+              <div key={coin.symbol} className="mob-markets__row">
+                <div className="mob-markets__asset">
+                  <CoinIcon symbol={coin.symbol} />
+                  <div className="mob-markets__asset-text">
+                    <div className="mob-markets__symbol">
+                      {coin.symbol}
+                      <span>/USDT</span>
+                    </div>
+                    <div className="mob-markets__price">
+                      {t ? `$${formatPrice(t.lastPrice)}` : '—'}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mob-markets__stats">
+                  <div
+                    className={`mob-markets__change ${
+                      change == null ? '' : isUp ? 'is-up' : 'is-down'
+                    }`}
+                  >
+                    {formatChange(change)}
+                  </div>
+                  <div className="mob-markets__volume-label">VOLUME 24H ( USDT ) :</div>
+                  <div className="mob-markets__volume">
+                    {t ? formatVolume(t.quoteVolume) : '—'}
+                  </div>
+                </div>
+
+                <button
+                  type="button"
+                  className="mob-markets__trade-btn"
+                  onClick={() => handleTrade(coin.symbol)}
+                >
+                  TRADE
+                </button>
+              </div>
+            )
+          })}
+        </div>
+
+        <Pagination
+          total={filtered.length}
+          page={safePage}
+          pageSize={PAGE_SIZE}
+          onPage={setPage}
+          totalPages={totalPages}
+        />
+      </div>
+    </section>
+    </>
   )
 }

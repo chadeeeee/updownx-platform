@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { useAuth } from '../context/AuthContext'
 import { PAYOUT_PROFIT_PCT, useTrading } from '../context/TradingContext'
 import useAvatar from '../hooks/useAvatar'
@@ -39,7 +40,7 @@ function Field({ label, children }) {
   )
 }
 
-function ProfileForm({ userId, email, onSavedName }) {
+function ProfileForm({ userId, email, userName, userSurname, onSavedName }) {
   const defaults = {
     name: '',
     surname: '',
@@ -73,7 +74,7 @@ function ProfileForm({ userId, email, onSavedName }) {
             className="account-input"
             value={form.name}
             onChange={update('name')}
-            placeholder="John"
+            placeholder={userName || 'Name'}
           />
         </Field>
         <Field label="Surname">
@@ -82,7 +83,7 @@ function ProfileForm({ userId, email, onSavedName }) {
             className="account-input"
             value={form.surname}
             onChange={update('surname')}
-            placeholder="Doe"
+            placeholder={userSurname || 'Surname'}
           />
         </Field>
         <Field label="Email">
@@ -243,7 +244,7 @@ function Modal({ title, onClose, children }) {
     }
   }, [onClose])
 
-  return (
+  return createPortal(
     <div
       className="account-modal__backdrop"
       onClick={(e) => {
@@ -265,7 +266,8 @@ function Modal({ title, onClose, children }) {
         <h2 className="account-modal__title">{title}</h2>
         <div className="account-modal__body">{children}</div>
       </div>
-    </div>
+    </div>,
+    document.body,
   )
 }
 
@@ -415,7 +417,7 @@ export default function Account() {
 
   const userId = user?.id ?? null
   const email = user?.email ?? 'user@updownx.com'
-  const displayId = user?.id ?? 88294012
+  const displayId = user?.public_id ?? '000000000000'
 
   const displayName =
     [savedProfile.name || user?.name, savedProfile.surname || user?.surname]
@@ -506,6 +508,8 @@ export default function Account() {
       <ProfileForm
         userId={userId}
         email={email}
+        userName={user?.name}
+        userSurname={user?.surname}
         onSavedName={(p) => setSavedProfile(p)}
       />
     ),

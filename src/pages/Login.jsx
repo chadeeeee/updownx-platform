@@ -5,16 +5,15 @@ import laptop from '../assets/auth/laptop.png'
 import { useAuth } from '../context/AuthContext'
 import './auth.css'
 
-function MailIcon() {
+function UserIcon() {
   return (
     <svg width="15" height="15" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-      <rect x="1.5" y="3" width="13" height="10" rx="1.5" stroke="currentColor" strokeWidth="1.5" />
+      <circle cx="8" cy="6" r="3" stroke="currentColor" strokeWidth="1.5" />
       <path
-        d="M2 4.5 8 9l6-4.5"
+        d="M2.5 14a5.5 5.5 0 0 1 11 0"
         stroke="currentColor"
         strokeWidth="1.5"
         strokeLinecap="round"
-        strokeLinejoin="round"
       />
     </svg>
   )
@@ -96,17 +95,17 @@ export default function Login() {
           <form className="auth-form" onSubmit={handleSubmit} noValidate>
             <div className="auth-field">
               <label className="auth-label" htmlFor="email">
-                E-mail
+                Account ID / Login
               </label>
               <div className="auth-input auth-input--with-leading">
                 <span className="auth-input__icon">
-                  <MailIcon />
+                  <UserIcon />
                 </span>
                 <input
                   id="email"
-                  type="email"
-                  autoComplete="email"
-                  placeholder="you@example.com"
+                  type="text"
+                  autoComplete="username"
+                  placeholder="398064"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { NavLink, Link, Outlet, useNavigate } from 'react-router-dom'
 import CoinIcon from './CoinIcon'
 import UserAvatar from './UserAvatar'
@@ -114,7 +114,7 @@ function MarketsCard({ tickers }) {
   )
 }
 
-const MAX_TRADES = 4
+const MAX_TRADES = 50
 
 function generateTrade() {
   const coin = TRADE_COINS[Math.floor(Math.random() * TRADE_COINS.length)]
@@ -137,6 +137,8 @@ function LiveTradesCard() {
   const [trades, setTrades] = useState(() =>
     Array.from({ length: MAX_TRADES }, () => generateTrade()),
   )
+  const [visibleCount, setVisibleCount] = useState(MAX_TRADES)
+  const listRef = useRef(null)
 
   useEffect(() => {
     const id = setInterval(() => {
@@ -145,11 +147,36 @@ function LiveTradesCard() {
     return () => clearInterval(id)
   }, [])
 
+  // Compute how many rows fully fit so we never show a clipped half-row.
+  useLayoutEffect(() => {
+    const list = listRef.current
+    if (!list) return undefined
+
+    const recompute = () => {
+      const row = list.querySelector('.live-trade-row')
+      if (!row) return
+      const rowH = row.getBoundingClientRect().height
+      if (!rowH) return
+      const styles = getComputedStyle(list)
+      const gap = parseFloat(styles.rowGap || styles.gap || '0') || 0
+      const avail = list.clientHeight
+      const n = Math.max(1, Math.floor((avail + gap) / (rowH + gap)))
+      setVisibleCount(n)
+    }
+
+    recompute()
+    const ro = new ResizeObserver(recompute)
+    ro.observe(list)
+    return () => ro.disconnect()
+  }, [])
+
+  const visibleTrades = trades.slice(0, visibleCount)
+
   return (
     <section className="card">
       <h3 className="card__title">Live Trades</h3>
-      <div className="market-list live-trades">
-        {trades.map((t) => (
+      <div className="market-list live-trades" ref={listRef}>
+        {visibleTrades.map((t) => (
           <div key={t.id} className="market-row live-trade-row">
             <UserAvatar name={t.name} />
             <span className="market-row__name">
@@ -180,6 +207,30 @@ export default function AppLayout() {
     logout()
     navigate('/trading')
   }
+
+  // Bind the sidebar height to the main content column so Live Trades always
+  // ends at the same baseline as the last content card on the right.
+  const sidebarRef = useRef(null)
+  const contentRef = useRef(null)
+
+  useLayoutEffect(() => {
+    const sidebar = sidebarRef.current
+    const content = contentRef.current
+    if (!sidebar || !content) return undefined
+
+    const sync = () => {
+      sidebar.style.height = `${Math.max(220, content.offsetHeight)}px`
+    }
+
+    sync()
+    const ro = new ResizeObserver(sync)
+    ro.observe(content)
+    window.addEventListener('resize', sync)
+    return () => {
+      ro.disconnect()
+      window.removeEventListener('resize', sync)
+    }
+  }, [])
 
   return (
     <div className="app-shell">
@@ -264,12 +315,12 @@ export default function AppLayout() {
       </header>
 
       <div className="app-body">
-        <aside className="app-sidebar">
+        <aside className="app-sidebar" ref={sidebarRef}>
           <MarketsCard tickers={tickers} />
           <LiveTradesCard />
         </aside>
 
-        <main className="app-content">
+        <main className="app-content" ref={contentRef}>
           <Outlet />
         </main>
       </div>

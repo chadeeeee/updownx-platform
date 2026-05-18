@@ -5,6 +5,10 @@ import CoinPicker from '../components/CoinPicker'
 import TradingViewChart from '../components/TradingViewChart'
 import UserAvatar from '../components/UserAvatar'
 import { COINS, TRADE_COINS } from '../data/coins'
+import useBinancePrices, {
+  formatVolume,
+  formatChange,
+} from '../hooks/useBinancePrices'
 import { randomTraderName } from '../data/liveTraders'
 import { useAuth } from '../context/AuthContext'
 import { useMarket } from '../context/MarketContext'
@@ -48,7 +52,7 @@ const DURATION_PRESETS = [
 const DURATION_MIN = 3
 const DURATION_MAX = 24 * 3600
 
-const TABS = ['Open positions', 'History']
+const TABS = ['Open positions', 'History', 'Orders']
 const MOBILE_TABS = ['Trade', 'Markets', 'Positions', 'Traders']
 
 const MOBILE_POS_COLS = '1.2fr 0.7fr 0.9fr 1fr 80px'
@@ -502,6 +506,85 @@ function MobilePositionRow({ position, now }) {
   )
 }
 
+/* -------------------- Markets panel (mobile) -------------------- */
+function MobileMarketsPanel({ onSelect }) {
+  const [query, setQuery] = useState('')
+  const { tickers } = useBinancePrices()
+
+  const filtered = useMemo(() => {
+    const q = query.trim().toLowerCase()
+    if (!q) return COINS
+    return COINS.filter(
+      (c) =>
+        c.symbol.toLowerCase().includes(q) ||
+        c.name.toLowerCase().includes(q),
+    )
+  }, [query])
+
+  return (
+    <div className="mob-markets">
+      <label className="mob-markets__search">
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+          <circle cx="7" cy="7" r="5" stroke="currentColor" strokeWidth="1.5" />
+          <path d="m11 11 3 3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+        </svg>
+        <input
+          type="search"
+          placeholder="Search..."
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+        />
+      </label>
+
+      <div className="mob-markets__list">
+        {filtered.map((coin) => {
+          const t = tickers[`${coin.symbol}USDT`]
+          const change = t ? t.priceChangePercent : null
+          const isUp = change != null && change >= 0
+          return (
+            <div key={coin.symbol} className="mob-markets__row">
+              <div className="mob-markets__asset">
+                <CoinIcon symbol={coin.symbol} />
+                <div className="mob-markets__asset-text">
+                  <div className="mob-markets__symbol">
+                    {coin.symbol}
+                    <span>/USDT</span>
+                  </div>
+                  <div className="mob-markets__price">
+                    {t ? `$${formatPrice(t.lastPrice)}` : '—'}
+                  </div>
+                </div>
+              </div>
+
+              <div className="mob-markets__stats">
+                <div
+                  className={`mob-markets__change ${
+                    change == null ? '' : isUp ? 'is-up' : 'is-down'
+                  }`}
+                >
+                  {formatChange(change)}
+                </div>
+                <div className="mob-markets__volume-label">VOLUME 24H ( USDT ) :</div>
+                <div className="mob-markets__volume">
+                  {t ? formatVolume(t.quoteVolume) : '—'}
+                </div>
+              </div>
+
+              <button
+                type="button"
+                className="mob-markets__trade-btn"
+                onClick={() => onSelect && onSelect(coin.symbol)}
+              >
+                TRADE
+              </button>
+            </div>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
+
 /* -------------------- Traders panel (mobile) -------------------- */
 function TradersPanel() {
   const [trades, setTrades] = useState(() =>
@@ -652,8 +735,12 @@ export default function Trading() {
                   ? isAuthenticated
                     ? 'No open positions yet — pick a time and amount on the right.'
                     : 'Sign in to open positions.'
-                  : 'No closed trades yet.'}
+                  : tab === 'Orders'
+                    ? 'No pending orders.'
+                    : 'No closed trades yet.'}
               </div>
+            ) : tab === 'Orders' ? (
+              <div className="data-table__empty">No pending orders.</div>
             ) : (
               visiblePositions.map((p) => (
                 <PositionRow key={p.id} position={p} now={now} />
@@ -748,6 +835,16 @@ export default function Trading() {
             )}
           </div>
         </section>
+      </div>
+
+      {/* ---- Mobile: Markets tab ---- */}
+      <div className={`mob-markets-wrap ${mobileTab !== 'Markets' ? 'mob-hide' : ''}`}>
+        <MobileMarketsPanel
+          onSelect={(sym) => {
+            setSymbol(sym)
+            setMobileTab('Trade')
+          }}
+        />
       </div>
 
       {/* ---- Mobile: Traders tab ---- */}

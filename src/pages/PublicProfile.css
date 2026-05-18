@@ -1,0 +1,143 @@
+/* ============================================================
+   UpdownX — Public Profile Page
+   Standalone page (no sidebar / nav) for shared profile links
+   ============================================================ */
+
+.public-profile-page {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  min-height: 100vh;
+  background: #05070a;
+  color: #e3e7fc;
+  font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  overflow: auto;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 60px 24px 80px;
+}
+
+.public-profile-page--loading,
+.public-profile-page--error {
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+
+.public-profile-inner {
+  width: 100%;
+  max-width: 860px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* ---- Loading spinner ---- */
+.public-profile-loader {
+  width: 40px;
+  height: 40px;
+  border: 3px solid rgba(0, 255, 163, 0.15);
+  border-top-color: #00ffa3;
+  border-radius: 50%;
+  animation: pp-spin 0.7s linear infinite;
+}
+
+@keyframes pp-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ---- Error card ---- */
+.public-profile-error-card {
+  text-align: center;
+  padding: 40px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 18px;
+  max-width: 420px;
+}
+
+.public-profile-error-card h2 {
+  font-size: 22px;
+  font-weight: 700;
+  margin: 0 0 8px;
+  color: #f0f2f5;
+}
+
+.public-profile-error-card p {
+  font-size: 14px;
+  color: #8b949e;
+  margin: 0 0 24px;
+}
+
+.public-profile-error-card__link {
+  display: inline-block;
+  background: #00ffa3;
+  color: #0b0f14;
+  font-weight: 700;
+  font-size: 13px;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  text-decoration: none;
+  padding: 12px 28px;
+  border-radius: 999px;
+}
+
+.public-profile-error-card__link:hover {
+  filter: brightness(1.05);
+}
+
+/* ---- Hero overrides for public page ---- */
+.profile-hero--public {
+  pointer-events: none;
+}
+
+.profile-hero__avatar--static {
+  cursor: default;
+  pointer-events: none;
+}
+
+/* ---- Back link ---- */
+.public-profile-back {
+  display: flex;
+  justify-content: center;
+  padding-top: 12px;
+}
+
+.public-profile-back__link {
+  display: inline-block;
+  background: rgba(0, 255, 163, 0.08);
+  border: 1px solid rgba(0, 255, 163, 0.2);
+  color: #00ffa3;
+  font-weight: 700;
+  font-size: 13px;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  text-decoration: none;
+  padding: 14px 32px;
+  border-radius: 999px;
+  transition: background-color 0.15s ease;
+}
+
+.public-profile-back__link:hover {
+  background: rgba(0, 255, 163, 0.14);
+}
+
+/* ---- Responsive ---- */
+@media (max-width: 768px) {
+  .public-profile-page {
+    padding: 32px 16px 60px;
+  }
+
+  .public-profile-inner {
+    gap: 16px;
+  }
+}
+
+@media (max-width: 520px) {
+  .public-profile-page {
+    padding: 20px 12px 48px;
+  }
+}

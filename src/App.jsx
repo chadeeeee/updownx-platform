@@ -12,6 +12,7 @@ import Balance from './pages/Balance'
 import Tournaments from './pages/Tournaments'
 import History from './pages/History'
 import Account from './pages/Account'
+import PublicProfile from './pages/PublicProfile'
 
 function App() {
   return (
@@ -25,6 +26,7 @@ function App() {
           <Route element={<AppLayout />}>
             <Route path="/" element={<Navigate to="/trading" replace />} />
             <Route path="/trading" element={<Trading />} />
+            <Route path="/u/:publicId" element={<PublicProfile />} />
             <Route path="/markets" element={<Markets />} />
             <Route path="/tournaments" element={<Tournaments />} />
 

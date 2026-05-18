@@ -356,41 +356,135 @@
   color: var(--app-accent);
 }
 
-/* Trading activity sidebar (right side of tournaments) */
-.tournament-activity {
-  position: sticky;
-  top: 24px;
-  height: fit-content;
+/* Tournament leaderboard — flatter look that blends with the card. */
+.tournament-leaderboard {
+  gap: 4px;
 }
 
-.activity-item {
+.tournament-leaderboard .data-table__head {
+  padding: 0 16px;
+  font-size: 11px;
+}
+
+.tournament-leaderboard__row {
+  background: rgba(255, 255, 255, 0.015);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  border-radius: 10px;
+}
+
+.tournament-leaderboard__row:hover {
+  background: rgba(0, 255, 163, 0.03);
+}
+
+/* Inner layout: banner+leaderboard on the left, activity column on the right.
+   The activity column's height is synchronised to the main column via a
+   ResizeObserver in Tournaments.jsx so they end at the same baseline. */
+.tournament-inner {
+  display: grid;
+  grid-template-columns: 1fr 300px;
+  gap: 16px;
+  align-items: start;
+}
+
+.tournament-main {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
+}
+
+.tournament-activity {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+  min-height: 0;
+}
+
+/* The list grows to fill the activity column. The visible row count is
+   computed in Tournaments.jsx; remaining vertical space is distributed
+   between rows so the last visible row aligns with the column bottom. */
+.tournament-activity__list {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 8px;
+  overflow: hidden;
+}
+
+.tournament-activity__title {
+  margin: 0 0 4px 4px;
+  font: 700 12px/1 var(--app-font);
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  color: var(--app-text-muted);
+}
+
+.tournament-activity__list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.tournament-activity__row {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
   background: var(--app-row-bg);
-  border: 1px solid transparent;
-  border-radius: 8px;
-  padding: 10px 12px;
-  transition: border-color 0.15s ease, transform 0.15s ease;
+  border: 1px solid var(--app-border-soft);
+  border-radius: 10px;
+  padding: 10px 14px;
+  transition: border-color 0.15s ease;
 }
 
-.activity-item:hover {
+.tournament-activity__row:hover {
   border-color: rgba(0, 255, 163, 0.25);
-  transform: translateX(2px);
 }
 
-.activity-item__avatar {
-  width: 30px;
-  height: 30px;
-  border-radius: 50%;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  color: #0b0f14;
-  font: 900 11px/1 var(--app-font);
+.tournament-activity__info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.tournament-activity__user {
+  font: 800 13px/1 var(--app-font);
+  color: var(--app-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tournament-activity__pair {
+  font: 600 10px/1 var(--app-font);
+  letter-spacing: 0.3px;
+  color: var(--app-text-muted);
+  text-transform: uppercase;
+}
+
+.tournament-activity__meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 5px;
   flex-shrink: 0;
-  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.2);
+}
+
+.tournament-activity__amount {
+  font: 900 13px/1 var(--app-font);
+}
+
+.tournament-activity__amount.is-up { color: var(--app-accent); }
+.tournament-activity__amount.is-down { color: var(--app-danger); }
+
+.tournament-activity__when {
+  font: 700 9px/1 var(--app-font);
+  letter-spacing: 0.4px;
+  color: var(--app-text-muted);
 }
 
 /* Leaderboard avatar (Trader column) */
@@ -412,7 +506,75 @@
 
 .tournament-layout {
   display: grid;
-  grid-template-columns: 1fr 320px;
+  grid-template-columns: 1fr;
   gap: 16px;
   align-items: start;
+}
+
+/* -------------------- Mobile layout (kept at end so it overrides desktop rules) -------------------- */
+@media (max-width: 860px) {
+  .tournament-card {
+    padding: 14px;
+    gap: 14px;
+  }
+
+  .tournament-inner {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+  .tournament-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .tournament-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .tournament-banner {
+    min-height: 220px;
+  }
+  .tournament-banner__heading {
+    font-size: 26px;
+  }
+  .tournament-banner__top {
+    padding: 14px 16px 0;
+  }
+  .tournament-banner__bottom {
+    padding: 14px 16px 16px;
+  }
+
+  /* Activity column on mobile: natural height, all rows, no JS sync.
+     The inline height set by the ResizeObserver is overridden via !important. */
+  .tournament-activity {
+    height: auto !important;
+  }
+  .tournament-activity__list {
+    justify-content: flex-start;
+    overflow: visible;
+  }
+  .tournament-activity__row {
+    padding: 10px 12px;
+  }
+
+  .warriors-grid {
+    grid-template-columns: 1fr;
+  }
+
+  /* Leaderboard collapses to 3 columns (rank / trader / profit) — Win-Loss
+     and Last Trade hidden so cells don't overlap on narrow viewports.
+     !important needed to beat inline gridTemplateColumns on each row. */
+  .tournament-leaderboard .data-table__head,
+  .tournament-leaderboard__row {
+    grid-template-columns: 44px 1fr auto !important;
+    padding: 0 12px;
+  }
+  .tournament-leaderboard .data-table__head > :nth-child(n + 4),
+  .tournament-leaderboard__row > :nth-child(n + 4) {
+    display: none;
+  }
 }
